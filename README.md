@@ -8,4 +8,4 @@ Integrantes:
 - Lesly Mariana Alvarez Alvarez
 - Michelle Gutiérrez Araya
 
-Carrera: Ingeniería Electronica
+Carrera: Ingeniería Electrónica
