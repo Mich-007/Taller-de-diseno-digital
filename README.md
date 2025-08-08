@@ -1,4 +1,4 @@
-# Taller-de-diseno-digital
+# Taller de diseno digital
 
 En este repositorio se trabajará y subiran los trabajos o proyectos del taller de diseño digital
  
