@@ -1,0 +1,16 @@
+`timescale 1ns / 1ps
+module TestbenchMuxiplexor;
+    logic [3:0] user_input;
+    logic [6:0] display_out;
+
+    multiplexor uut(
+        .user_input(user_input), // conectamos señales TB ? módulo
+        .display_out(display_out));
+        
+    initial begin
+        user_input = '0;
+        user_input = 4'b0001; #30;
+        user_input = 4'b0010; #30;
+        user_input = 4'b1111; #30;
+    end
+endmodule
