@@ -1,52 +1,46 @@
 `timescale 1ns / 1ps
 module decodificador(
-    input  logic [3:0]  SW0,      // switch[3:0]
-    input  logic [3:0]  SW1,      // switch[7:4]
-    input  logic [3:0]  SW2,      // switch[11:8]
-    input  logic [3:0]  SW3,      // switch[15:12]
-    input  logic [1:0]  BTN,      // los dos botnoes para seleccionar el grupo de switches
+    input  logic [3:0]  SW0,      // switches 
+    input  logic [3:0]  SW1,      // switches 
+    input  logic [3:0]  SW2,      // switches 
+    input  logic [3:0]  SW3,      // switches 
+    input  logic [1:0]  BTN,      // los dos botones para seleccionar el grupo de switches
     output logic [6:0]  SEG,      // displays de 7 segmentos
-    output logic [7:0]  AN,       // ·nodos del display
-    output logic [3:0]  seg_debug, //valor para observar el display de 7 segmentos como decimal en el testbench
-    output logic [3:0]  an_debug    //valor para observar el ·nodo del display de 7 segmentos como decimal en el testbench
+    output logic [3:0]  AN,       // √°nodos del display de 7 segmentos
+    output logic [1:0] LED
 );
+
 
   always_comb begin
     // Apagado por defecto
-    SEG         = 7'b111_1111;
-    AN          = 8'b1111_1111;
-    seg_debug = 4'hF; // F = OFF
-    an_debug = 4'hF;
+    SEG = 7'b111_1111;
+    AN = 4'b1111;
+    LED = 2'b11;
+    if (BTN == 2'b00) //se revisa que lo botones est√©n en el modo esperado para el primer  grupo de switches
+        LED = 2'b00;  //se usa s√≥lo para el funcionamiento f√≠sico, donde los leds se encienden para visualizar el modo en el que est√° la FPGA, dependen de los botones
+        if (SW0 == 4'b0011) begin //se revisa que los switches est√©n en el estado 
+        AN          = 4'b0111;  // enciende d√≠gito 0 (ajusta si tu mapeo es distinto)
+        SEG         = 7'b000_0110;   // 3 (activos en bajo)
+        end
+    else if (BTN == 2'b01)
+        LED = 2'b01;
+        if(SW1 == 4'b0110) begin
+            AN          = 4'b1011;  // d√≠gito 1
+            SEG         = 7'b010_0000;   // 6
+        end
+    else if (BTN == 2'b10)
+        LED = 2'b10;
+        if (SW2 == 4'b1000) begin
+            AN          = 4'b1101;  // d√≠gito 2
+            SEG         = 7'b000_0000;   // 8
+        end
 
-    if      (BTN == 2'b00 && SW0 == 4'b0011) begin
-      AN          = 8'b0111_1111;  // enciende dÌgito 0 (ajusta si tu mapeo es distinto)
-      SEG         = 7'b000_0110;   // 3 (activos en bajo)
-      seg_debug = 4'd3;
-      an_debug = 4'd2;
-      $display("[%0t] 3", $time);
-    end
-    else if (BTN == 2'b01 && SW1 == 4'b0110) begin
-      AN          = 8'b1011_1111;  // dÌgito 1
-      SEG         = 7'b010_0000;   // 6
-      seg_debug = 4'd6;
-      an_debug = 4'd2;
-      $display("[%0t] 6", $time);
-    end
-    else if (BTN == 2'b10 && SW2 == 4'b1000) begin
-      AN          = 8'b1101_1111;  // dÌgito 2
-      SEG         = 7'b000_0000;   // 8
-      seg_debug = 4'd8;
-      an_debug = 4'd3;
-      $display("[%0t] 8", $time);
-    end
-    else if (BTN == 2'b11 && SW3 == 4'b1001) begin
-      AN          = 8'b1110_1111;  // dÌgito 3
-      SEG         = 7'b000_1100;   // 9
-      seg_debug = 4'd9;
-      an_debug = 4'd4;
-      $display("[%0t] 9", $time);
-    end
+    else if (BTN == 2'b11)
+        LED = 2'b11;
+        if (SW3 == 4'b1001) begin
+            AN          = 4'b1110;  // d√≠gito 3
+            SEG         = 7'b000_1100;   // 9
+        end
     // else: queda apagado con digit_debug = F
-  end
-
+    end
 endmodule
