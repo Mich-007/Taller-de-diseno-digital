@@ -1,46 +1,56 @@
 `timescale 1ns / 1ps
 module decodificador(
-    input  logic [3:0]  SW0,      // switches 
-    input  logic [3:0]  SW1,      // switches 
-    input  logic [3:0]  SW2,      // switches 
-    input  logic [3:0]  SW3,      // switches 
+    input  logic [3:0]  SW0,      // switches [3-0]    
+    input  logic [3:0]  SW1,      // switches [7-4]
+    input  logic [3:0]  SW2,      // switches [11-8]
+    input  logic [3:0]  SW3,      // switches [15-12]
     input  logic [1:0]  BTN,      // los dos botones para seleccionar el grupo de switches
     output logic [6:0]  SEG,      // displays de 7 segmentos
-    output logic [3:0]  AN,       // ánodos del display de 7 segmentos
-    output logic [1:0] LED
+    output logic [7:0] AN       // ánodos del display de 7 segmentos
 );
-
-
-  always_comb begin
-    // Apagado por defecto
-    SEG = 7'b111_1111;
-    AN = 4'b1111;
-    LED = 2'b11;
-    if (BTN == 2'b00) //se revisa que lo botones estén en el modo esperado para el primer  grupo de switches
-        LED = 2'b00;  //se usa sólo para el funcionamiento físico, donde los leds se encienden para visualizar el modo en el que está la FPGA, dependen de los botones
-        if (SW0 == 4'b0011) begin //se revisa que los switches estén en el estado 
-        AN          = 4'b0111;  // enciende dígito 0 (ajusta si tu mapeo es distinto)
-        SEG         = 7'b000_0110;   // 3 (activos en bajo)
-        end
-    else if (BTN == 2'b01)
-        LED = 2'b01;
-        if(SW1 == 4'b0110) begin
-            AN          = 4'b1011;  // dígito 1
-            SEG         = 7'b010_0000;   // 6
-        end
-    else if (BTN == 2'b10)
-        LED = 2'b10;
-        if (SW2 == 4'b1000) begin
-            AN          = 4'b1101;  // dígito 2
-            SEG         = 7'b000_0000;   // 8
-        end
-
-    else if (BTN == 2'b11)
-        LED = 2'b11;
-        if (SW3 == 4'b1001) begin
-            AN          = 4'b1110;  // dígito 3
-            SEG         = 7'b000_1100;   // 9
-        end
-    // else: queda apagado con digit_debug = F
+    logic [3:0] SW;//variable lógica para crear un sólo case y se aplique en todos los grupos
+    
+always_comb begin
+    AN = 8'hFF;
+    SW = 4'h0; //estados iniciales, donde todo esté apagado
+    unique case (BTN)
+    2'b00: begin //si los dos botones tienen un valor de 00 se activa el primer ánodo y se enciende el display
+     AN[0] = 1'b0;    //de acuerdo al número al que corresponda la secuencia de los switches
+     SW = SW0;
+    end 
+    2'b01: begin //si los dos botones tienen un valor de 01 se activa el segundo ánodo y se enciende el display
+     AN[1] = 1'b0;
+     SW = SW1;
+    end // 0
+    2'b10: begin  //si los dos botones tienen un valor de 10 se activa el tercer ánodo y se enciende el display
+     AN[2] = 1'b0;
+     SW = SW2;
+    end // 0
+    2'b11: begin //si los dos botones tienen un valor de 11 se activa el cuarto ánodo y se enciende el display
+     AN[3] = 1'b0;
+     SW = SW3;
+    end // 0
+    endcase
+// Decodificador HEX a 7 segmentos (activo en bajo): {g,f,e,d,c,b,a}
+    unique case (SW)
+        4'h0: SEG = 7'b1000000;
+        4'h1: SEG = 7'b1111001;
+        4'h2: SEG = 7'b0100100;
+        4'h3: SEG = 7'b0110000;
+        4'h4: SEG = 7'b0011001;
+        4'h5: SEG = 7'b0010010;
+        4'h6: SEG = 7'b0000010;
+        4'h7: SEG = 7'b1111000;
+        4'h8: SEG = 7'b0000000;
+        4'h9: SEG = 7'b0010000;
+        4'hA: SEG = 7'b0001000;
+        4'hB: SEG = 7'b0000011;
+        4'hC: SEG = 7'b1000110;
+        4'hD: SEG = 7'b0100001;
+        4'hE: SEG = 7'b0000110;
+        4'hF: SEG = 7'b0001110;
+        default: SEG = 7'b1111111; // OFF
+      endcase
     end
+
 endmodule
