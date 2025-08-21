@@ -1,0 +1,94 @@
+`timescale 1ns/1ps // Escala de tiempo y presicion 
+
+module ALU_tb; // Nombre del modulo de prueba 
+
+    parameter N = 4; // Parametro(Se puede elegr cualquier bit para prueba)
+    localparam MAX_VAL = (1<<N)-1; // es el valor máximo que puede tener un número de N bits  2^N - 1 
+
+    // Entradas
+    logic [N-1:0] ALUA, ALUB;
+    logic [3:0] ALUControl;
+    logic ALUFlagIn;
+
+    // Salidas
+    logic [N-1:0] ALUResult;
+    logic C, Z;
+
+    // Instancia del DUT
+    ALU #(N) dut (
+        .ALUA(ALUA),
+        .ALUB(ALUB),
+        .ALUControl(ALUControl),
+        .ALUFlagIn(ALUFlagIn),
+        .ALUResult(ALUResult),
+        .C(C),
+        .Z(Z)
+    );
+
+    // Función para generar N bits aleatorios
+    function logic [N-1:0] rand_n(); 
+        rand_n = $random & MAX_VAL;//Genera números aleatorios de N bits
+    endfunction
+
+    initial begin// Bloque de inicio 
+        $display("===== TESTBENCH ALU %0d-BIT =====", N);
+        $display("ALUControl | ALUA   ALUB   FlagIn | Result   C Z");
+        $display("------------------------------------------------");
+
+        // AND
+        ALUControl = 4'h0; ALUA = rand_n(); ALUB = rand_n(); ALUFlagIn = 0; #1;
+        $display("%0h         | %b  %b    %b     | %b  %b %b", ALUControl, ALUA, ALUB, ALUFlagIn, ALUResult, C, Z);
+
+        // OR
+        ALUControl = 4'h1; ALUA = rand_n(); ALUB = rand_n(); ALUFlagIn = 0; #1;
+        $display("%0h         | %b  %b    %b     | %b  %b %b", ALUControl, ALUA, ALUB, ALUFlagIn, ALUResult, C, Z);
+
+        // NOT
+        ALUControl = 4'h2; ALUA = rand_n(); ALUB = rand_n(); ALUFlagIn = $random % 2; #1;
+        $display("%0h         | %b  %b    %b     | %b  %b %b", ALUControl, ALUA, ALUB, ALUFlagIn, ALUResult, C, Z);
+
+        // SUMA
+        ALUControl = 4'h3; ALUA = rand_n(); ALUB = rand_n(); ALUFlagIn = $random % 2; #1;
+        $display("%0h         | %b  %b    %b     | %b  %b %b", ALUControl, ALUA, ALUB, ALUFlagIn, ALUResult, C, Z);
+
+        // RESTA
+        ALUControl = 4'h4; ALUA = rand_n(); ALUB = rand_n(); ALUFlagIn = $random % 2; #1;
+        $display("%0h         | %b  %b    %b     | %b  %b %b", ALUControl, ALUA, ALUB, ALUFlagIn, ALUResult, C, Z);
+
+        // INC
+        ALUControl = 4'h5; ALUA = rand_n(); ALUB = rand_n(); ALUFlagIn = $random % 2; #1;
+        $display("%0h         | %b  %b    %b     | %b  %b %b", ALUControl, ALUA, ALUB, ALUFlagIn, ALUResult, C, Z);
+
+        // DEC
+        ALUControl = 4'h6; ALUA = rand_n(); ALUB = rand_n(); ALUFlagIn = $random % 2; #1;
+        $display("%0h         | %b  %b    %b     | %b  %b %b", ALUControl, ALUA, ALUB, ALUFlagIn, ALUResult, C, Z);
+
+        // XOR
+        ALUControl = 4'h7; ALUA = rand_n(); ALUB = rand_n(); ALUFlagIn = 0; #1;
+        $display("%0h         | %b  %b    %b     | %b  %b %b", ALUControl, ALUA, ALUB, ALUFlagIn, ALUResult, C, Z);
+
+        // IZQ, OPERANDO A
+        ALUControl = 4'h8; ALUA = rand_n(); ALUB = $random % N; ALUFlagIn = $random % 2; #1;
+        $display("%0h         | %b  %b    %b     | %b  %b %b", ALUControl, ALUA, ALUB, ALUFlagIn, ALUResult, C, Z);
+
+        // DERC, OPERANDO A
+        ALUControl = 4'h9; ALUA = rand_n(); ALUB = $random % N; ALUFlagIn = $random % 2; #1;
+        $display("%0h         | %b  %b    %b     | %b  %b %b", ALUControl, ALUA, ALUB, ALUFlagIn, ALUResult, C, Z);
+
+        // CORRIMENTO ARITMETICO A LA IZQ 
+        ALUControl = 4'hA; ALUA = rand_n(); ALUB = $random % N; ALUFlagIn = $random % 2; #1;
+        $display("%0h         | %b  %b    %b     | %b  %b %b", ALUControl, ALUA, ALUB, ALUFlagIn, ALUResult, C, Z);
+
+        // MAX
+        ALUControl = 4'hB; ALUA = rand_n(); ALUB = rand_n(); ALUFlagIn = 0; #1;
+        $display("%0h         | %b  %b    %b     | %b  %b %b", ALUControl, ALUA, ALUB, ALUFlagIn, ALUResult, C, Z);
+
+        // MIN
+        ALUControl = 4'hC; ALUA = rand_n(); ALUB = rand_n(); ALUFlagIn = 0; #1;
+        $display("%0h         | %b  %b    %b     | %b  %b %b", ALUControl, ALUA, ALUB, ALUFlagIn, ALUResult, C, Z);
+
+        $display("===== FIN DEL TEST =====");
+        $stop;
+    end
+
+endmodule
