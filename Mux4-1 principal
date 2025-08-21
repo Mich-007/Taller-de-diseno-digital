@@ -1,0 +1,23 @@
+//======================================================
+            // MUX 4 a 1 parametrizable
+//======================================================
+
+module m4_1 #(parameter N=8)( // Nombre del modulo y defnicion de la parametrizacion(Se puede cambiar en el test)
+ 
+    input  logic [N-1:0] d0, d1, d2, d3, // Definicion de las entradas 
+    input  logic [1:0]   se, // definicion del seleccionador  
+    output logic [N-1:0] y  // Definicion de la salida 
+    
+);
+    
+    always_comb begin // Bloque combnaconal; como es un mux no necesitaos memoria
+        case (se) // Se defiine los casos, para selecconar la entrada y salida
+            2'b00 : y = d0; // Si mi selccionador, es 00 mi salida va ser D0, igual para los demas casos, se uede ver en la tabla 
+            2'b01 : y = d1;
+            2'b10 : y = d2;
+            2'b11 : y = d3;
+            default: y = '0; 
+        endcase 
+    end
+
+endmodule // finaliza el modulo 
