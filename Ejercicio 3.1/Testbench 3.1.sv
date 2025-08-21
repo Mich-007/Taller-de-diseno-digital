@@ -39,7 +39,7 @@ module tb_switch_led_groups;
         // 
         // Caso 1: LEDs deben seguir switches si ningún botón está presionado
         // 
-        sw = 16'hA5A5;  // Patrón alternante (1010 0101 ... etc...)
+      sw = 16'hA5A5;  // Patrón alternante (ejemplo: 1010 0101 ... varios más)
         #10;            // Esperamos para que se propague
         if (led !== sw) // Verificamos que los LEDs sigan exactamente el valor de sw
             $error("Fail: leds deben igualar a sw cuando btn=0");
