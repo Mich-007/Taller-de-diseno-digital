@@ -1,0 +1,51 @@
+module ALU #( //NOMBRE DEL MODULO 
+    parameter N = 4 // PARAMETRO DEFNIDO, SE PUEDE CAMBIAR EN EL TEST 
+)(
+    input  logic [N-1:0] ALUA, ALUB,   // Operandos A y B 
+    input  logic [3:0]   ALUControl,  // Entrada de seleccion o control, elige en 0h - ch 
+    input  logic         ALUFlagIn,   // Bandera de acarreo/entrada de desplazamiento
+    output logic [N-1:0] ALUResult,   // Salida o resultado 
+    output logic         C, Z         // Banderas C = Carrey o acarreo y Z= Y=0 o Zero 
+);
+
+    logic [N:0] temp;  // para las operaciones con acarreo en FlagIn 
+
+    always_comb begin // Bloque combnacional 
+        // Valores por defecto
+        ALUResult = '0;
+        C = 0;
+        
+        case (ALUControl) // Se trabaja con casos,se definen todos las operaciones de 0h - ch
+            4'h0: ALUResult = ALUA & ALUB;     // AND
+            4'h1: ALUResult = ALUA | ALUB;     // OR
+            4'h2: ALUResult = (ALUFlagIn == 0) ? ~ALUA : ~ALUB;  // NOT
+            4'h3: begin                        // SUMA
+                temp = ALUA + ALUB + ALUFlagIn;
+                ALUResult = temp[N-1:0];
+                C = temp[N]; // ACARREO
+            end
+            4'h4: begin                        // RESTA
+                temp = ALUA - ALUB - ALUFlagIn;
+                ALUResult = temp[N-1:0];
+                C = temp[N]; 
+            end
+            4'h5: ALUResult = (ALUFlagIn==0) ? ALUA+1 : ALUB+1; // INC
+            4'h6: ALUResult = (ALUFlagIn==0) ? ALUA-1 : ALUB-1; // DEC
+            4'h7: ALUResult = ALUA ^ ALUB;     // XOR
+            4'h8: begin                        // IZQ, OPERANDO A
+                {C, ALUResult} = {ALUA, ALUFlagIn} << ALUB;
+            end
+            4'h9: begin                        // DERC, OPERANDO A
+                {ALUResult, C} = {ALUFlagIn, ALUA} >> ALUB;
+            end
+            4'hA: ALUResult = ALUA <<< ALUB;   // CORRIMENTO ARITMETICO A LA IZQ 
+            4'hB: ALUResult = (ALUA > ALUB) ? ALUA : ALUB; // MAX 
+            4'hC: ALUResult = (ALUA < ALUB) ? ALUA : ALUB; // MIN
+            default: ALUResult = '0;
+        endcase
+
+        // Bandera Zero
+        Z = (ALUResult == 0);
+
+    end
+endmodule
