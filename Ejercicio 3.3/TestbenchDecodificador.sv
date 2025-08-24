@@ -20,23 +20,32 @@ module TestbenchDecodificador;
     BTN = 2'b00;#10;
     SW0 = 4'hA; #30;
     SW0 = 4'h8; #30;
+    SW1 = 4'h8; #30;
+    SW2 = 4'hF; #30;
+    SW3 = 4'h1; #30;
     
     //caso #2. Segundo grupo de switches  
     BTN = 2'b01;#10;  
     SW1 = 4'h5; #30;
-    SW1 = 4'h1; #30; 
+    SW1 = 4'h1; #30;
+    SW0 = 4'h8; #30;
+    SW2 = 4'hC; #30;
+    SW3 = 4'hB; #30; 
     
     //caso #3. Tercer grupo de switches  
     BTN = 2'b10;#10;
     SW2 = 4'h3; #30;
     SW2 = 4'h9; #30;   
-    
+    SW0 = 4'h7; #30;
+    SW1 = 4'h4; #30;
+    SW3 = 4'hA; #30;
     //caso #4. Cuarto grupo de switches  
     BTN = 2'b11;#10;    
     SW3 = 4'h0; #30;
     SW3 = 4'hB; #30;
-    
+    SW0 = 4'h5; #30;
+    SW1 = 4'h2; #30;
+    SW2 = 4'hD; #30;
     end
     
 endmodule
-
