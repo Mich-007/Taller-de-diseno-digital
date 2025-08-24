@@ -20,7 +20,7 @@ set_property PACKAGE_PIN J15 [get_ports {SW0[0]}]; set_property IOSTANDARD LVCMO
 set_property PACKAGE_PIN M18 [get_ports {BTN[0]}]; set_property IOSTANDARD LVCMOS33 [get_ports {BTN[0]}]
 set_property PACKAGE_PIN M17 [get_ports {BTN[1]}]; set_property IOSTANDARD LVCMOS33 [get_ports {BTN[1]}]
 
-## Ánodos de display 7 segmentos 
+##  nodos de display 7 segmentos 
 set_property PACKAGE_PIN J17 [get_ports {AN[7]}]; set_property IOSTANDARD LVCMOS33 [get_ports {AN[7]}]
 set_property PACKAGE_PIN J18 [get_ports {AN[6]}]; set_property IOSTANDARD LVCMOS33 [get_ports {AN[6]}]
 set_property PACKAGE_PIN T9 [get_ports {AN[5]}]; set_property IOSTANDARD LVCMOS33 [get_ports {AN[5]}]
