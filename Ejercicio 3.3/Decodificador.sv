@@ -1,15 +1,3 @@
-`timescale 1ns / 1ps
-module decodificador(
-    input  logic [3:0]  SW0,      // switches [3-0]    
-    input  logic [3:0]  SW1,      // switches [7-4]
-    input  logic [3:0]  SW2,      // switches [11-8]
-    input  logic [3:0]  SW3,      // switches [15-12]
-    input  logic [1:0]  BTN,      // los dos botones para seleccionar el grupo de switches
-    output logic [6:0]  SEG,      // displays de 7 segmentos
-    output logic [7:0] AN       // ánodos del display de 7 segmentos
-);
-    logic [3:0] SW;//variable lógica para crear un sólo case y se aplique en todos los grupos
-    
 always_comb begin
     AN = 8'hFF;
     SW = 4'h0; //estados iniciales, donde todo esté apagado
@@ -17,19 +5,31 @@ always_comb begin
     2'b00: begin //si los dos botones tienen un valor de 00 se activa el primer ánodo y se enciende el display
      AN[0] = 1'b0;    //de acuerdo al número al que corresponda la secuencia de los switches
      SW = SW0;
+     if (SW == SW1 || SW == SW2 || SW == SW3) begin
+        $error("Error: este no es el grupo seleccionado SW=%0d", SW);
+        end
     end 
     2'b01: begin //si los dos botones tienen un valor de 01 se activa el segundo ánodo y se enciende el display
      AN[1] = 1'b0;
      SW = SW1;
-    end // 0
+     if (SW == SW0 || SW == SW2 || SW == SW3) begin
+        $error("Error: este no es el grupo seleccionado SW=%0d", SW);
+        end
+    end 
     2'b10: begin  //si los dos botones tienen un valor de 10 se activa el tercer ánodo y se enciende el display
      AN[2] = 1'b0;
      SW = SW2;
-    end // 0
+     if (SW == SW0 || SW == SW1 || SW == SW2) begin
+        $error("Error: este no es el grupo seleccionado SW=%0d", SW);
+        end
+    end 
     2'b11: begin //si los dos botones tienen un valor de 11 se activa el cuarto ánodo y se enciende el display
      AN[3] = 1'b0;
      SW = SW3;
-    end // 0
+     if (SW == SW0 || SW == SW1 || SW == SW2) begin
+        $error("Error: este no es el grupo seleccionado SW=%0d", SW);
+        end
+    end
     endcase
 // Decodificador HEX a 7 segmentos (activo en bajo): {g,f,e,d,c,b,a}
     unique case (SW)
@@ -54,3 +54,4 @@ always_comb begin
     end
 
 endmodule
+
