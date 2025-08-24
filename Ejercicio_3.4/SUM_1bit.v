@@ -8,5 +8,5 @@ module SUM_1bit(
     output wire Cout // Acarreo de salida
 );
     assign Sum  = A ^ B ^ Cin; // XOR de las entradas
-    assign Cout = (A & B) | (A & Cin) | (B & Cin); // Generación de acarreo
+    assign Cout = (A & B) | (A & Cin) | (B & Cin); // GeneraciÃ³n de acarreo
 endmodule
