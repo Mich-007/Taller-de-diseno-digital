@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 
-// Modulo de bloque de CLA de 4 bits con lógica para acarreo
+// Modulo de bloque de CLA de 4 bits con lÃ³gica para acarreo
 module CLABloque (
     input  wire [3:0] A,
     input  wire [3:0] B,
@@ -31,7 +31,7 @@ module CLABloque (
     assign Sum[3] = p[3] ^ c3;
     assign Cout = c4;
 
-    // Señales de grupo de P y G
+    // SeÃ±ales de grupo de P y G
     assign P_s = p[3] & p[2] & p[1] & p[0];
     assign G_s = g[3] |(p[3] & g[2]) |(p[3] & p[2] & g[1]) |(p[3] & p[2] & p[1] & g[0]);                            
 endmodule
@@ -43,7 +43,7 @@ module CLA_16bits (
     output wire [15:0] Sum,  // Suma 
     output wire        Cout  // Acarreo final        
 );
-    // Señales por bloque de 4 bits
+    // SeÃ±ales por bloque de 4 bits
     wire [3:0] P, G;    // P_group y G_group de cada bloque
     wire C4, C8, C12, C16;
 
