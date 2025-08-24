@@ -34,9 +34,9 @@ module tb_comparacion_RCA_VS_CLA;
         .Cout(cout_cla)
     );
 
-    // Generador de estímulos
+    // Generador de estÃ­mulos
     initial begin
-        $display("=== Comparación RCA vs CLA (16 bits) ===");
+        $display("=== ComparaciÃ³n RCA vs CLA (16 bits) ===");
 
         // Pruebas determinadas
         a = 16'h0000; b = 16'h0000; cin = 0; #10 check_results();
@@ -51,7 +51,7 @@ module tb_comparacion_RCA_VS_CLA;
             #10 check_results();
         end
 
-        $display("=== Fin de la simulación ===");
+        $display("=== Fin de la simulaciÃ³n ===");
         $finish;
     end
 
