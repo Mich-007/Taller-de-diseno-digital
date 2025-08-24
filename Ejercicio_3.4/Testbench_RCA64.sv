@@ -16,7 +16,7 @@ module tb_RCA64;
         .Cout(Cout)
     );
 
-    // Generación de reloj de 10 MHz
+    // GeneraciÃ³n de reloj de 10 MHz
     initial clk = 0;
     always #50 clk = ~clk;
 
