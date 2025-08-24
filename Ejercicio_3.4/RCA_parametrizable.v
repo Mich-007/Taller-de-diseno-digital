@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 module RCA_parametrizable #(
-    parameter N = 8  // Tamaño de palabra (por defecto 8 bits)
+    parameter N = 8  // TamaÃ±o de palabra (por defecto 8 bits)
 )(
     input  wire [N-1:0] A, // Primer operando
     input  wire [N-1:0] B, // Segundo operando
