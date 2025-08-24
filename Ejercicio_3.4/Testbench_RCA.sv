@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 
 module tb_RCA;
-    // Número de bits
+    // NÃºmero de bits
     parameter N = 4;
 
     logic [N-1:0] A, B;
