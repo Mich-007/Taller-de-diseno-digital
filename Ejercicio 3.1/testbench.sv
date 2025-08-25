@@ -67,16 +67,16 @@ module testbench_FPGA_led;
     sw  = 16'hA5A5; btn = 4'b0000; #10; show_state("Patron A5A5");
 
     // Caso 7: switches patrón A5A5
-    sw  = 16'H0F0F; btn = 4'b0000; #10; show_state("Patrón 0F0F");
+    sw  = 16'H0F0F; btn = 4'b0010; #10; show_state("Patron 0F0F");
 
     // Caso 7: switches patrón A5A5
-    sw  = 16'hC3C3; btn = 4'b0000; #10; show_state("Patrón C3C3");
+    sw  = 16'hC3C3; btn = 4'b0010; #10; show_state("Patron C3C3");
 
     // Caso 8: switches patrón 0F0F con grupo 1 apagado
-    sw  = 16'hF0F0; btn = 4'b0010; #10; show_state("Patrón F0F0 con grupo1 off");
+    sw  = 16'hF0F0; btn = 4'b0010; #10; show_state("Patron F0F0 con grupo1 apagado");
 
     // Caso 9: switches patrón AAAA con grupo 3 apagado
-    sw  = 16'hAAAA; btn = 4'b1000; #10; show_state("Patrón AAAA con grupo3 off");
+    sw  = 16'hAAAA; btn = 4'b1010; #10; show_state("Patron AAAA con grupo3 apagado");
 
     $display("=================================================================================================================");
     $display("                                             FIN DE TESTBENCH                                                    ");
