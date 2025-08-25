@@ -57,25 +57,25 @@ module testbench_FPGA_led;
     // Caso 6: apagar grupos 0 y 2
     btn = 4'b0101; #10; show_state("Apagar grupos 0 y 2");
 
-    // Caso 6: apagar grupos 0 y 2
+    // Caso 7: apagar grupos 0 y 2
     btn = 4'b1101; #10; show_state("Apagar grupos 0, 2 y 3");
 
-    // Caso 6: apagar grupos 0 y 2
+    // Caso 8: apagar grupos 0 y 2
     btn = 4'b1111; #10; show_state("Apagar grupos 0, 1, 2 y 3");
 
-    // Caso 7: switches patrón A5A5
+    // Caso 9: switches patrón A5A5
     sw  = 16'hA5A5; btn = 4'b0000; #10; show_state("Patron A5A5");
 
-    // Caso 7: switches patrón A5A5
+    // Caso10: switches patrón
     sw  = 16'H0F0F; btn = 4'b0010; #10; show_state("Patron 0F0F");
 
-    // Caso 7: switches patrón A5A5
+    // Caso 11: switches patrón 
     sw  = 16'hC3C3; btn = 4'b0010; #10; show_state("Patron C3C3");
 
-    // Caso 8: switches patrón 0F0F con grupo 1 apagado
+    // Caso 12: switches patrón 
     sw  = 16'hF0F0; btn = 4'b0010; #10; show_state("Patron F0F0 con grupo1 apagado");
 
-    // Caso 9: switches patrón AAAA con grupo 3 apagado
+    // Caso 13: switches patrón 
     sw  = 16'hAAAA; btn = 4'b1010; #10; show_state("Patron AAAA con grupo3 apagado");
 
     $display("=================================================================================================================");
