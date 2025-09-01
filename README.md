@@ -7,5 +7,6 @@ Integrantes:
 - Brayan Ariel Vargas Rojas
 - Lesly Mariana Alvarez Alvarez
 - Michelle Gutiérrez Araya
+- Laura Elena Brenes Espinoza
 
 Carrera: Ingeniería Electrónica
