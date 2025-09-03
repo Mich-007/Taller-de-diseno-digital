@@ -1,4 +1,16 @@
-always_comb begin
+`timescale 1ns / 1ps
+module decodificador(
+    input  logic [3:0]  SW0,      // switches [3-0]    
+    input  logic [3:0]  SW1,      // switches [7-4]
+    input  logic [3:0]  SW2,      // switches [11-8]
+    input  logic [3:0]  SW3,      // switches [15-12]
+    input  logic [1:0]  BTN,      // los dos botones para seleccionar el grupo de switches
+    output logic [6:0]  SEG,      // displays de 7 segmentos
+    output logic [7:0] AN       // ánodos del display de 7 segmentos
+);
+    logic [3:0] SW;//variable lógica para crear un sólo case y se aplique en todos los grupos
+    
+   always_comb begin
     AN = 8'hFF;
     SW = 4'h0; //estados iniciales, donde todo esté apagado
     unique case (BTN)
