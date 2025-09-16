@@ -1,11 +1,11 @@
-// __________________________________________________________________
+// ============================================================
 // register_file.sv
 // Banco de registros parametrizable con lectura doble
 // - Número de registros: 2ⁿ
 // - Ancho de palabra: W bits
 // - Escritura controlada por 'we'
 // - Registro 0 protegido (siempre devuelve 0)
-// __________________________________________________________________
+// ============================================================
 
 module register_file #(
   parameter int N = 4,   // Bits de dirección → 2ⁿ registros
@@ -13,9 +13,7 @@ module register_file #(
 )(
   input  logic             clk,        // Reloj del sistema
   input  logic             rst,        // Reset síncrono
-  
   input  logic             we,         // Write enable
-  
   input  logic [N-1:0]     addr_rd,    // Dirección de escritura
   input  logic [N-1:0]     addr_rs1,   // Dirección de lectura 1
   input  logic [N-1:0]     addr_rs2,   // Dirección de lectura 2
@@ -38,4 +36,7 @@ module register_file #(
   // Lectura combinacional: acceso inmediato
   always_comb begin
     rs1 = (addr_rs1 == 0) ? '0 : regs[addr_rs1]; // reg0 siempre devuelve 0
-    rs
+    rs2 = (addr_rs2 == 0) ? '0 : regs[addr_rs2];
+  end
+
+endmodule
