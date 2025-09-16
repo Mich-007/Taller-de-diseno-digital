@@ -1,9 +1,17 @@
+// ============================================================
+// top_register_file.sv
+// Módulo superior para probar el banco de registros en FPGA
+// - Control por switches y botones
+// - Visualización en display de 7 segmentos
+// - Generación de datos aleatorios con LFSR corregido
+// ============================================================
+
 module top_register_file (
-  input  logic        clk,
-  input  logic [15:0] sw,
-  input  logic [4:0]  btn,
-  output logic [6:0]  seg,
-  output logic [7:0]  an
+  input  logic        clk,         // Reloj de 100 MHz
+  input  logic [15:0] sw,          // Switches: direcciones
+  input  logic [4:0]  btn,         // Botones: control
+  output logic [6:0]  seg,         // Segmentos del display
+  output logic [7:0]  an           // Ánodos del display
 );
 
   localparam int N = 4;
@@ -31,11 +39,11 @@ module top_register_file (
   assign addr_rs1 = sw[7:4];
   assign addr_rs2 = sw[11:8];
 
-  // Generador aleatorio
+  // Generador aleatorio corregido
   lfsr lfsr_inst (
     .clk(clk),
     .rst(rst),
-    .rand(rand_val)
+    .rand_out(rand_val) // ← nombre corregido
   );
 
   assign data_in = rand_val;
