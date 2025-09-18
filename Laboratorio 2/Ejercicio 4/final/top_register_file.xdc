@@ -57,11 +57,15 @@ set_property PACKAGE_PIN T9  [get_ports {an[5]}]; set_property IOSTANDARD LVCMOS
 set_property PACKAGE_PIN J18 [get_ports {an[6]}]; set_property IOSTANDARD LVCMOS33 [get_ports {an[6]}]
 set_property PACKAGE_PIN J17 [get_ports {an[7]}]; set_property IOSTANDARD LVCMOS33 [get_ports {an[7]}]
 
+set_property PACKAGE_PIN E2 [get_ports {rst}]
+set_property IOSTANDARD LVCMOS33 [get_ports {rst}]
+
+
 ## _____________________________________________________________________________________________________
 ## DEBUG LEDS
 ## _____________________________________________________________________________________________________
-set_property PACKAGE_PIN H17 [get_ports {led[0]}]; set_property IOSTANDARD LVCMOS33 [get_ports {led[0]}]
-set_property PACKAGE_PIN H7 [get_ports {led[1]}]; set_property IOSTANDARD LVCMOS33 [get_ports {led[1]}]
+##set_property PACKAGE_PIN H17 [get_ports {led[0]}]; set_property IOSTANDARD LVCMOS33 [get_ports {led[0]}]
+##set_property PACKAGE_PIN H7 [get_ports {led[1]}]; set_property IOSTANDARD LVCMOS33 [get_ports {led[1]}]
 
 ## _____________________________________________________________________________________________________
 ## OPTIONAL: Pull ups for buttons (enable if needed by your board)
