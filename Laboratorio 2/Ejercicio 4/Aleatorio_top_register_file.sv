@@ -1,11 +1,12 @@
-// ============================================================
+// _________________________________________________________________
 // top_register_file.sv
 // Módulo superior para probar el banco de registros en FPGA
 // - Control por switches y botones
 // - Visualización en display de 7 segmentos
 // - Generación de datos aleatorios con LFSR corregido
-// ============================================================
+// _________________________________________________________________
 
+//Nombre del modulo
 module top_register_file (
   input  logic        clk,         // Reloj de 100 MHz
   input  logic [15:0] sw,          // Switches: direcciones
