@@ -5,10 +5,10 @@ module Registro #(
   // escritura
   input  logic        REGiniciar,
   input  logic [15:0]  nuevo_dato,
-  // lectura por índice
+  // lectura por Ã­ndice
   input  logic [4:0]  leer_index,
   output logic [15:0]  leer_data,
-  // estado (opcional, útil para "playback")
+  // estado (opcional, Ãºtil para "playback")
   output logic [4:0]  REGposicion,
   output logic [5:0]  REGContador,   // 0..N
   output logic valor_leer_listo
@@ -34,14 +34,14 @@ module Registro #(
   
     assign REGposicion = posicion;
     assign REGContador = Contador;
-  // lectura simple por índice (combinacional)
+  // lectura simple por Ã­ndice (combinacional)
     
     always_ff @(posedge clk or posedge reset) begin
         if (reset) begin
             leer_data <= 8'h00;
             valor_leer_listo  <= 1'b0;
         end else begin
-            valor_leer_listo  <= leer_ahora;                 // válido 1 ciclo después
+            valor_leer_listo  <= leer_ahora;                 // vÃ¡lido 1 ciclo despuÃ©s
             if (leer_ahora) leer_data <= memoria[leer_index];
         end
     end
