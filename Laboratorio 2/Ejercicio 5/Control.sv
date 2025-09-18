@@ -22,7 +22,7 @@ module Control #(
     input logic  [4:0]  REGposicion,
     output logic [15:0] nuevo_dato,DisplayValor, REGvalor, LED,
     output logic [6:0]  ALUA,ALUB, s_valor,
-    output logic [4:0]  leer_index,     // 韓dice actual a leer del Registro
+    output logic [4:0]  leer_index,     // 铆ndice actual a leer del Registro
     output logic [1:0]  op_lat,
     output logic        LFSRiniciar,s_cargar,
     output logic        ALUiniciar,
@@ -35,7 +35,7 @@ module Control #(
     typedef enum logic [2:0] {R_Espera, R_SetIndex,R_EsperaDato, R_Pausa, R_Index} r_estado;
     
 // -------------------------------------------------------------------
-//Configuraci髇 de estados
+//Configuraci贸n de estados
 // -------------------------------------------------------------------
     r_estado estadoregistro;
     r_estado r_estado_q;
@@ -98,8 +98,8 @@ module Control #(
     logic REGLeer, start_pulse;
     assign REGLeer = sw1_db & ~sw_db_d1;
     wire modo_registro = sw1_db;
-    logic [4:0] base_index;   // 韓dice del m醩 antiguo
-    logic [5:0] k;          // cu醤tos llevamos mostrados
+    logic [4:0] base_index;   // 铆ndice del m谩s antiguo
+    logic [5:0] k;          // cu谩ntos llevamos mostrados
     logic [7:0] data_registro;
     wire displayFSM = (estado_actual != S_Display)&& (estado_siguiente == S_Display);
     wire displayregistro = (r_estado_q != R_Pausa) && (estadoregistro == R_Pausa);
@@ -175,7 +175,7 @@ module Control #(
     end
 
  // -------------------------------------------------------------------    
-//Iniciar M骴ulos       
+//Iniciar M贸dulos       
  // -------------------------------------------------------------------
     always_ff @(posedge clk or posedge reset) begin
     if (reset) begin
@@ -189,7 +189,7 @@ module Control #(
     end
     
 // -------------------------------------------------------------------    
-//Activaci髇 y guardado de datos en registro  
+//Activaci贸n y guardado de datos en registro  
 // -------------------------------------------------------------------
     logic reg_wr;
     logic [7:0] wr_data; //valor que se guarda en el registro        
@@ -323,7 +323,7 @@ module Control #(
     always_ff @(posedge clk or posedge reset) begin 
         if (reset) begin Displayiniciar <= 1'b0; 
             DisplayValor <= 8'h00; 
-        end else begin // Pulso 鷑ico hacia Display 
+        end else begin // Pulso 煤nico hacia Display 
             Displayiniciar <= 1'b0; // Valor estable en el mismo ciclo del pulso 
         if (displayregistro) begin 
             Displayiniciar <= 1'b1; 
@@ -376,14 +376,14 @@ module Control #(
             if (Displayiniciar) begin
           // Cuando inicia una nueva "pantalla":
                 if (modo_registro) begin
-            // MODO REGISTRO: LED rota 0,1,2 seg鷑 k
+            // MODO REGISTRO: LED rota 0,1,2 seg煤n k
                     LED <= led_for_registro(k);
             end else begin
-            // FSM normal: A,B y ALU seg鷑 operaci髇
+            // FSM normal: A,B y ALU seg煤n operaci贸n
                 unique case (origen_display)
                     S_LFSRA: LED <= onehot_idx(0);        // LED0 = A
                     S_LFSRB: LED <= onehot_idx(1);        // LED1 = B
-                    S_ALU  : LED <= led_from_op(op_lat);  // LED por operaci髇
+                    S_ALU  : LED <= led_from_op(op_lat);  // LED por operaci贸n
                     default: LED <= 16'h0000;
                 endcase
             end
