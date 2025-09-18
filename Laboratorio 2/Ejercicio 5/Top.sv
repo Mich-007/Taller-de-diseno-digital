@@ -12,11 +12,11 @@ module Top#(
     output logic [15:0] LED
 );
     logic [1:0]op_lat; 
-    logic [4:0] leer_index, REGposicion;     // índice actual a leer del Registro
+    logic [4:0] leer_index, REGposicion;     // Ã­ndice actual a leer del Registro
     logic [5:0] REGContador;
     logic [6:0] ALUA, ALUB;
     logic [6:0] LFSRdato, s_valor;   
-    logic [15:0] leer_data, nuevo_dato;    // dato leído del Registro
+    logic [15:0] leer_data, nuevo_dato;    // dato leÃ­do del Registro
     logic [15:0] ALUResult;
     logic [15:0] DisplayValor; 
     logic LFSRiniciar, LFSRvalido, s_cargar;
