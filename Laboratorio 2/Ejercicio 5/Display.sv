@@ -4,7 +4,7 @@ module Display(
     input logic        Displayiniciar, PulsoMitad, PulsoFin,
     input logic [15:0] DisplayValor,        // dos nibbles hex
     output logic [6:0] SEG,                  // a..g activos en bajo
-    output logic [7:0] AN,              // dígitos activos en bajo
+    output logic [7:0] AN,              // dÃ­gitos activos en bajo
     output logic [1:0] DisplayActivado
 );
 
@@ -31,8 +31,8 @@ module Display(
         AN  = 8'b1111_1111;  // off
         SEG = 7'b111_1111;
         unique case (fase)
-            F_D1: begin AN=8'b1111_1110; SEG=hex(dig0); end   // 1er dígito
-            F_D2: begin AN=8'b1111_1101; SEG=(dig1==0)?7'b111_1111:hex(dig1); end // 2º dígito
+            F_D1: begin AN=8'b1111_1110; SEG=hex(dig0); end   // 1er dÃ­gito
+            F_D2: begin AN=8'b1111_1101; SEG=(dig1==0)?7'b111_1111:hex(dig1); end // 2Âº dÃ­gito
             default: ;
         endcase
     end
