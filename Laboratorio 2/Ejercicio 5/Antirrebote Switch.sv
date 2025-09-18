@@ -48,7 +48,7 @@ module Antirrebote_Switch#(
             sw0_db <= 1'b0;
         end else begin
             if (sw0_sync != sw0_db) begin
-        // el usuario cambió el switch: espera que se mantenga estable
+        // el usuario cambiÃ³ el switch: espera que se mantenga estable
                 if (cnt == DB_TICKS-1) begin
                     sw0_db <= sw0_sync;
                     cnt   <= '0;
@@ -72,7 +72,7 @@ module Antirrebote_Switch#(
             sw1_db <= 1'b0;
         end else begin
             if (sw1_sync != sw1_db) begin
-        // el usuario cambió el switch: espera que se mantenga estable
+        // el usuario cambiÃ³ el switch: espera que se mantenga estable
                 if (cnt1 == DB_TICKS-1) begin
                 sw1_db <= sw1_sync;
                 cnt1   <= '0;
