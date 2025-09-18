@@ -1,5 +1,5 @@
 ## =======================
-## SWITCHES (SW0–SW15)
+## SWITCHES (SW0â€“SW15)
 ## =======================
 set_property PACKAGE_PIN V10 [get_ports {sw[15]}];  set_property IOSTANDARD LVCMOS33 [get_ports {sw[15]}]
 set_property PACKAGE_PIN U11 [get_ports {sw[14]}];  set_property IOSTANDARD LVCMOS33 [get_ports {sw[14]}]
@@ -19,18 +19,18 @@ set_property PACKAGE_PIN L16 [get_ports {sw[1]}]; set_property IOSTANDARD LVCMOS
 set_property PACKAGE_PIN J15 [get_ports {sw[0]}]; set_property IOSTANDARD LVCMOS33 [get_ports {sw[0]}]
 
 ## =======================
-## BOTONES (BTN0–BTN3)
+## BOTONES (BTN0â€“BTN3)
 ## =======================
 set_property PACKAGE_PIN P17 [get_ports {btn[0]}]; set_property IOSTANDARD LVCMOS33 [get_ports {btn[0]}]
 set_property PACKAGE_PIN M17 [get_ports {btn[1]}]; set_property IOSTANDARD LVCMOS33 [get_ports {btn[1]}]
 set_property PACKAGE_PIN M18 [get_ports {btn[2]}]; set_property IOSTANDARD LVCMOS33 [get_ports {btn[2]}]
 set_property PACKAGE_PIN P18 [get_ports {btn[3]}]; set_property IOSTANDARD LVCMOS33 [get_ports {btn[3]}]
-# Añadir aquí los pines correctos de btn[2] y btn[3] según tu placa
+# AÃ±adir aquÃ­ los pines correctos de btn[2] y btn[3] segÃºn tu placa
 #set_property PACKAGE_PIN <PIN> [get_ports {btn[2]}]; set_property IOSTANDARD LVCMOS33 [get_ports {btn[2]}]
 #set_property PACKAGE_PIN <PIN> [get_ports {btn[3]}]; set_property IOSTANDARD LVCMOS33 [get_ports {btn[3]}]
 
 ## =======================
-## LEDS (LD0–LD15)
+## LEDS (LD0â€“LD15)
 ## =======================
 set_property PACKAGE_PIN H17 [get_ports {led[0]}];  set_property IOSTANDARD LVCMOS33 [get_ports {led[0]}]
 set_property PACKAGE_PIN K15  [get_ports {led[1]}];  set_property IOSTANDARD LVCMOS33 [get_ports {led[1]}]
