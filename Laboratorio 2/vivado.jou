@@ -1,0 +1,338 @@
+#-----------------------------------------------------------
+# Vivado v2024.2 (64-bit)
+# SW Build 5239630 on Fri Nov 08 22:35:27 MST 2024
+# IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+# SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+# Start of session at: Thu Sep 18 07:43:52 2025
+# Process ID         : 9404
+# Current directory  : C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2
+# Command line       : vivado.exe -gui_launcher_event rodinguilauncherevent9448 C:\Users\lauri\Desktop\Taller de digitales\Proyecto 2\project_prueba2\project_prueba2.xpr
+# Log file           : C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/vivado.log
+# Journal file       : C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2\vivado.jou
+# Running On         : LAPTOP-L7AUJ4JJ
+# Platform           : Windows Server 2016 or Windows 10
+# Operating System   : 22631
+# Processor Detail   : AMD Ryzen 5 5600H with Radeon Graphics         
+# CPU Frequency      : 3294 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 21319 MB
+# Swap memory        : 1342 MB
+# Total Virtual      : 22661 MB
+# Available Virtual  : 10793 MB
+#-----------------------------------------------------------
+start_gui
+open_project {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.xpr}
+update_compile_order -fileset sources_1
+add_files -norecurse -scan_for_includes {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/Proyecto_2_IP_Core/Proyecto_2_IP_Core.srcs/sources_1/bd/design_1/design_1_bmstub.v}}
+update_compile_order -fileset sources_1
+create_project project_new {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new} -part xc7a100tcsg324-1
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new
+file mkdir {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/Top.sv} w ]
+add_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/Top.sv}}
+update_compile_order -fileset sources_1
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/hex7seg.v} w ]
+add_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/hex7seg.v}}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/clk_div.sv} w ]
+add_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/clk_div.sv}}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/lfsr16.v} w ]
+add_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/lfsr16.v}}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/reg_pipo.sv} w ]
+add_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/reg_pipo.sv}}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/design_1_sim.sv} w ]
+add_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/design_1_sim.sv}}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/design_1_stub.sv} w ]
+add_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/design_1_stub.sv}}
+update_compile_order -fileset sources_1
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/constrs_1
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/constrs_1
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/constrs_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/constrs_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/constrs_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/constrs_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/constrs_1
+file mkdir {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/constrs_1/new}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/constrs_1/new/Nexys4_clkgen.xdc} w ]
+add_files -fileset constrs_1 {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/constrs_1/new/Nexys4_clkgen.xdc}}
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sim_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sim_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sim_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sim_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sim_1/new
+set_property SOURCE_SET sources_1 [get_filesets sim_1]
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sim_1/new
+file mkdir {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sim_1/new}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sim_1/new/tb_Top_clkgen.sv} w ]
+add_files -fileset sim_1 {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sim_1/new/tb_Top_clkgen.sv}}
+update_compile_order -fileset sim_1
+# Disabling source management mode.  This is to allow the top design properties to be set without GUI intervention.
+set_property source_mgmt_mode None [current_project]
+set_property top tb_Top_clkgen [get_filesets sim_1]
+set_property top_lib xil_defaultlib [get_filesets sim_1]
+# Re-enabling previously disabled source management mode.
+set_property source_mgmt_mode All [current_project]
+update_compile_order -fileset sim_1
+remove_files  {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/Top.sv}}
+file delete -force {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/Top.sv}
+remove_files  {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/clk_div.sv}}
+file delete -force {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.srcs/sources_1/new/clk_div.sv}
+update_compile_order -fileset sources_1
+close_project
+create_project project_new {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new} -part xc7a100tcsg324-1
+add_files -norecurse -scan_for_includes {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/new/Top.sv} {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/new/clk_div.sv} {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/new/hex7seg.sv} {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/new/lfsr16.sv} {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/new/design_1_stub.sv} {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/new/reg_pipo.sv} {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/new/design_1_sim.sv}}
+update_compile_order -fileset sources_1
+update_compile_order -fileset sources_1
+set_property SOURCE_SET sources_1 [get_filesets sim_1]
+add_files -fileset sim_1 -norecurse -scan_for_includes {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/new/tb_Top_clkgen.sv}}
+update_compile_order -fileset sim_1
+update_compile_order -fileset sim_1
+add_files -fileset constrs_1 -norecurse {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/new/Nexys4_clkgen.xdc}}
+launch_runs synth_1 -jobs 6
+wait_on_run synth_1
+launch_runs impl_1 -jobs 6
+wait_on_run impl_1
+reset_run synth_1
+launch_runs impl_1 -jobs 6
+wait_on_run impl_1
+current_project project_prueba2
+export_ip_user_files -of_objects  [get_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/Proyecto_2_IP_Core/Proyecto_2_IP_Core.srcs/sources_1/bd/design_1/design_1_bmstub.v}}] -no_script -reset -force -quiet
+remove_files  {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/Proyecto_2_IP_Core/Proyecto_2_IP_Core.srcs/sources_1/bd/design_1/design_1_bmstub.v}}
+current_project project_new
+current_project project_prueba2
+current_project project_new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.srcs/sim_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.srcs/sim_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.srcs/sim_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.srcs/sim_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.srcs/sim_1/new
+current_project project_prueba2
+set_property SOURCE_SET sources_1 [get_filesets sim_1]
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.srcs/sim_1/new
+file mkdir {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.srcs/sim_1/new}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.srcs/sim_1/new/design_1_wrapper.sv} w ]
+add_files -fileset sim_1 {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.srcs/sim_1/new/design_1_wrapper.sv}}
+update_compile_order -fileset sim_1
+export_ip_user_files -of_objects  [get_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.srcs/sim_1/new/design_1_wrapper.sv}}] -no_script -reset -force -quiet
+remove_files  -fileset sim_1 {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.srcs/sim_1/new/design_1_wrapper.sv}}
+file delete -force {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.srcs/sim_1/new/design_1_wrapper.sv}
+current_project project_new
+reset_run synth_1
+launch_runs synth_1 -jobs 6
+launch_runs impl_1 -jobs 6
+wait_on_run impl_1
+open_run impl_1
+launch_simulation
+source tb_Top_clkgen.tcl
+reset_run synth_1
+launch_runs synth_1 -jobs 6
+wait_on_run synth_1
+launch_runs impl_1 -jobs 6
+wait_on_run impl_1
+run all
+launch_runs impl_1 -to_step write_bitstream -jobs 6
+wait_on_run impl_1
+open_hw_manager
+connect_hw_server -allow_non_jtag
+open_hw_target
+set_property PROGRAM.FILE {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.runs/impl_1/Top.bit} [get_hw_devices xc7a100t_0]
+current_hw_device [get_hw_devices xc7a100t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_new/project_new.runs/impl_1/Top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+current_project project_prueba2
+current_project project_new
+close_sim
+close_project
+open_hw_manager
+connect_hw_server -allow_non_jtag
+open_hw_target
+set_property PROGRAM.FILE {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.runs/impl_1/Top.bit} [get_hw_devices xc7a100t_0]
+current_hw_device [get_hw_devices xc7a100t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.runs/impl_1/Top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+close_hw_manager
+launch_simulation
+source tb_Top.tcl
+close_sim
+close_project
+create_project project_michi {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi} -part xc7a100tcsg324-1
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new
+file mkdir {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new/debounce.sv} w ]
+add_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new/debounce.sv}}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new/top_register_file.sv} w ]
+add_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new/top_register_file.sv}}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new/lfsr.sv} w ]
+add_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new/lfsr.sv}}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new/seven_seg_driver.sv} w ]
+add_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new/seven_seg_driver.sv}}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new/register_file.sv} w ]
+add_files {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sources_1/new/register_file.sv}}
+update_compile_order -fileset sources_1
+update_compile_order -fileset sources_1
+update_compile_order -fileset sources_1
+update_compile_order -fileset sources_1
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sim_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sim_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sim_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sim_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sim_1/new
+set_property SOURCE_SET sources_1 [get_filesets sim_1]
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sim_1/new
+file mkdir {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sim_1/new}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sim_1/new/register_file_tb.sv} w ]
+add_files -fileset sim_1 {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/sim_1/new/register_file_tb.sv}}
+update_compile_order -fileset sim_1
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/constrs_1
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/constrs_1
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/constrs_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/constrs_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/constrs_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/constrs_1/new
+file mkdir C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/constrs_1
+file mkdir {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/constrs_1/new}
+close [ open {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/constrs_1/new/top_register_file.xdc} w ]
+add_files -fileset constrs_1 {{C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.srcs/constrs_1/new/top_register_file.xdc}}
+launch_simulation
+source top_register_file.tcl
+close_sim
+set_property top register_file_tb [get_filesets sim_1]
+set_property top_lib xil_defaultlib [get_filesets sim_1]
+update_compile_order -fileset sim_1
+launch_simulation
+source register_file_tb.tcl
+launch_runs synth_1 -jobs 6
+wait_on_run synth_1
+launch_runs impl_1 -jobs 6
+wait_on_run impl_1
+launch_runs impl_1 -to_step write_bitstream -jobs 6
+wait_on_run impl_1
+open_hw_manager
+connect_hw_server -allow_non_jtag
+open_hw_target
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.runs/impl_1/top_register_file.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+close_hw_manager
+reset_run synth_1
+close_sim
+launch_runs synth_1 -jobs 6
+wait_on_run synth_1
+launch_runs impl_1 -jobs 6
+wait_on_run impl_1
+launch_runs impl_1 -to_step write_bitstream -jobs 6
+wait_on_run impl_1
+open_hw_manager
+connect_hw_server -allow_non_jtag
+open_hw_target
+set_property PROGRAM.FILE {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.runs/impl_1/top_register_file.bit} [get_hw_devices xc7a100t_0]
+current_hw_device [get_hw_devices xc7a100t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.runs/impl_1/top_register_file.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+create_project project_michi2 {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi2} -part xc7a100tcsg324-1
+close_project
+close_hw_manager
+open_project {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.xpr}
+update_compile_order -fileset sources_1
+launch_simulation
+source tb_Top.tcl
+reset_run impl_1 -prev_step 
+launch_runs impl_1 -to_step write_bitstream -jobs 6
+wait_on_run impl_1
+open_hw_manager
+connect_hw_server -allow_non_jtag
+open_hw_target
+set_property PROGRAM.FILE {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.runs/impl_1/Top.bit} [get_hw_devices xc7a100t_0]
+current_hw_device [get_hw_devices xc7a100t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_prueba2/project_prueba2.runs/impl_1/Top.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+close_hw_manager
+close_sim
+launch_simulation
+source tb_Top.tcl
+close_sim
+current_project project_michi
+reset_run impl_1 -prev_step 
+launch_runs impl_1 -to_step write_bitstream -jobs 6
+wait_on_run impl_1
+open_hw_manager
+connect_hw_server -allow_non_jtag
+open_hw_target
+set_property PROGRAM.FILE {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.runs/impl_1/top_register_file.bit} [get_hw_devices xc7a100t_0]
+current_hw_device [get_hw_devices xc7a100t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a100t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a100t_0]
+set_property PROGRAM.FILE {C:/Users/lauri/Desktop/Taller de digitales/Proyecto 2/project_michi/project_michi.runs/impl_1/top_register_file.bit} [get_hw_devices xc7a100t_0]
+program_hw_devices [get_hw_devices xc7a100t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a100t_0] 0]
+close_project
