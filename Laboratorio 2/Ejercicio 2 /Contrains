@@ -1,0 +1,32 @@
+## =======================
+## RELOJ 100 MHz
+## =======================
+set_property PACKAGE_PIN E3         [get_ports clk]
+set_property IOSTANDARD LVCMOS33    [get_ports clk]
+create_clock -name sys_clk -period 10.000 [get_ports clk]
+
+## =======================
+## RESET (botón de la placa, activo alto)
+## BTN_RESET en P17
+## =======================
+set_property PACKAGE_PIN M17        [get_ports reset]
+set_property IOSTANDARD LVCMOS33    [get_ports reset]
+
+## =======================
+## BOTÓN EXTERNO 
+## Conectar al pin JA1 
+## =======================
+set_property PACKAGE_PIN C17         [get_ports EXT_BTN]
+set_property IOSTANDARD LVCMOS33    [get_ports EXT_BTN]
+
+## =======================
+## LEDS (LD0 - LD7)
+## =======================
+set_property PACKAGE_PIN V11 [get_ports {LED[0]}]; set_property IOSTANDARD LVCMOS33 [get_ports {LED[0]}]
+set_property PACKAGE_PIN V12 [get_ports {LED[1]}]; set_property IOSTANDARD LVCMOS33 [get_ports {LED[1]}]
+set_property PACKAGE_PIN V14 [get_ports {LED[2]}]; set_property IOSTANDARD LVCMOS33 [get_ports {LED[2]}]
+set_property PACKAGE_PIN V15 [get_ports {LED[3]}]; set_property IOSTANDARD LVCMOS33 [get_ports {LED[3]}]
+set_property PACKAGE_PIN T16 [get_ports {LED[4]}]; set_property IOSTANDARD LVCMOS33 [get_ports {LED[4]}]
+set_property PACKAGE_PIN U14 [get_ports {LED[5]}]; set_property IOSTANDARD LVCMOS33 [get_ports {LED[5]}]
+set_property PACKAGE_PIN T15 [get_ports {LED[6]}]; set_property IOSTANDARD LVCMOS33 [get_ports {LED[6]}]
+set_property PACKAGE_PIN V16 [get_ports {LED[7]}]; set_property IOSTANDARD LVCMOS33 [get_ports {LED[7]}]
