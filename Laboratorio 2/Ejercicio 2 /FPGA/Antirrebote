@@ -1,0 +1,33 @@
+//==================================================
+// Filtro digital antirrebotes
+// Solo valida un cambio si se mantiene estable N ciclos
+// ==================================================
+module debounce #(
+    parameter N = 20   // número de bits del contador (controla duración del filtrado)
+)(  
+    input  logic clk,
+    input  logic rst,
+    input  logic btn_in, // señal sincronizada (esperada sincronizada o directamente desde sync)
+    output logic btn_out  // señal limpia sin rebotes
+);
+    logic [N-1:0] counter; // contador que mide cuánto tiempo la entrada fue diferente
+    logic state;  // estado actual reconocido de la señal (último valor aceptado)
+
+    always_ff @(posedge clk or posedge rst) begin
+        if (rst) begin
+            counter <= '0; // reinicia el contador a 0 
+            state   <= 0; // estado inicial 0
+            btn_out <= 0; // salida limpia en 0
+        end else begin
+            if (btn_in != state) begin // si la entrada difiere del estado aceptado
+                counter <= counter + 1; // incremento el contador
+                if (&counter) begin   // se llena el contador
+                    state   <= btn_in; // acepto el nuevo valor
+                    btn_out <= btn_in; // actualizo la salida limpia
+                    counter <= '0; // reseteo el contador para la próxima transición
+                end
+            end else begin
+                counter <= '0;   // si la entrada coincide con el estado, mantengo contador en 0
+            end
+        end
+    end
