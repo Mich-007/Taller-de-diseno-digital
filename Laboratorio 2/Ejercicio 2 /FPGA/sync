@@ -1,0 +1,23 @@
+//=======================================================
+// Sincronizador de 2 FFs
+// Evita metastabilidad al ingresar señales asincronicas
+//=======================================================
+module sync (
+    input  logic clk,
+    input  logic rst,      // activo alto
+    input  logic btn_in, // Señal de boton asincronica
+    output logic btn_sync   // Señal sincronizada al clk 
+);
+    logic ff1;   // primer fli-flop intermedio
+
+    always_ff @(posedge clk or posedge rst) begin
+        if (rst) begin      // si reset está activo..
+            ff1      <= 0;    // ...limpio el primer flip-flop
+            btn_sync <= 0;     // ...y limpio la salida sincronizada
+        end else begin              // si no hay reset, en cada flanco de reloj:
+            ff1      <= btn_in;// capturo la entrada en el primer FF
+            btn_sync <= ff1;  // la salida toma el valor del primer FF (2º FF)
+        end
+    end
+endmodule
+
