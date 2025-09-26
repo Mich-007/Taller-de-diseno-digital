@@ -1,0 +1,37 @@
+//=======================================================
+// top_btn_externo.sv
+// Botón externo -> sync -> edge_detector -> contador
+//=======================================================
+module top_btn_externo (
+    input  logic clk,         // reloj 100 MHz
+    input  logic reset,       // reset activo alto
+    input  logic EXT_BTN,     // botón externo (entrada del PMOD)
+    output logic [7:0] LED    // LEDs muestran el conteo
+);
+    logic btn_sync;           // salida del sincronizador
+    logic btn_pulse;          // pulso de un ciclo
+
+    // sincronizador
+    sync u_sync (
+        .clk(clk),
+        .rst(reset),
+        .btn_in(EXT_BTN),
+        .btn_sync(btn_sync)
+    );
+
+    // detector de flanco
+    edge_detector u_edge (
+        .clk(clk),
+        .rst(reset),
+        .sig_in(btn_sync),
+        .pulse(btn_pulse)
+    );
+
+    // contador
+    counter_test u_counter (
+        .clk(clk),
+        .rst_n(~reset),   // reset activo en bajo
+        .EN(btn_pulse),
+        .Q(LED)
+    );
+endmodule
