@@ -1,0 +1,32 @@
+module top_antirebote (
+    input  logic clk,
+    input  logic reset,      // activo alto
+    input  logic BTN0,
+    output logic [7:0] LED
+); // solo se realiza instancias de los demas modulos 
+    logic btn_sync, btn_clean;
+
+    // sincronizador
+    sync u_sync (
+        .clk(clk),
+        .rst(reset),
+        .btn_in(BTN0),
+        .btn_sync(btn_sync)
+    );
+
+    // antirrebote
+    debounce u_debounce (
+        .clk(clk),
+        .rst(reset),
+        .btn_in(btn_sync),
+        .btn_out(btn_clean)
+    );
+
+    // contador
+    counter_test u_counter (
+        .clk(clk),
+        .rst_n(~reset),
+        .EN(btn_clean),
+        .Q(LED)
+    );
+endmodule
