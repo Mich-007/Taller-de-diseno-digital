@@ -1,0 +1,17 @@
+// ==================================================
+// Contador de prueba
+// Incrementa en cada pulso válido
+// ==================================================
+module counter_test (
+    input  logic clk,
+    input  logic rst_n,   // activo en bajo
+    input  logic EN, //Enable = pulso de un ciclo
+    output logic [7:0] Q  // salida mostrada en LEDs
+);
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) // si rst_n es 0 (reset activo)  
+            Q <= 8'd0; // reinicia contador a 0
+        else if (EN) // si no hay reset y EN está activo...
+            Q <= Q + 1;  // ...incrementa el contador 
+    end
+endmodule
