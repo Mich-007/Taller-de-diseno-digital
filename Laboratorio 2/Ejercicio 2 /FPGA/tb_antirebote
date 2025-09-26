@@ -1,0 +1,32 @@
+`timescale 1ns/1ps
+module tb_antirebote;
+    logic clk = 0, reset = 1, BTN0 = 0;
+    logic [7:0] LED;
+
+    // DUT
+    top_antirebote dut ( // instancia del modulo de modulos 
+        .clk(clk),
+        .reset(reset),
+        .BTN0(BTN0),
+        .LED(LED)
+    );
+
+    // Reloj de 100 MHz // Generador de reloj: cambia cada 5 ns -> periodo 10 ns -> 100 MHz
+    always #5 clk = ~clk;
+
+    initial begin
+        $dumpfile("tb.vcd"); // nombre del archivo VCD para el waveform
+        $dumpvars(0, tb_antirebote); // volcar todas las señales del tb en el VCD
+
+        // Mantener reset activo al inicio y luego desactivarlo
+         // Reset
+        #20 reset = 0;
+
+        // Rebotes simulados, ahora se simula una pulsación con rebotes: cambios rápidos al principio 
+        #100 BTN0 = 1; #10 BTN0 = 0; #10 BTN0 = 1; #20 BTN0 = 0; #15 BTN0 = 1;
+        #100 BTN0 = 0; // suelto el botón
+        #200 BTN0 = 1; #100 BTN0 = 0; // Segunda pulsación (más simple)
+// Tiempo final de observación antes de finalizar simulación
+        #1000 $finish; // termina la simulación y cierra el VCD
+    end
+endmodule
