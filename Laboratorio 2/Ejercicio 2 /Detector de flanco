@@ -1,0 +1,22 @@
+//=======================================================
+// edge_detector.sv
+// Genera un pulso de 1 ciclo cuando detecta un flanco ascendente
+//=======================================================
+module edge_detector (
+    input  logic clk,
+    input  logic rst,
+    input  logic sig_in,   // señal sincronizada del botón
+    output logic pulse     // pulso de 1 ciclo en flanco ascendente
+);
+    logic sig_d;           // registro para guardar el valor anterior
+
+    always_ff @(posedge clk or posedge rst) begin
+        if (rst) begin
+            sig_d <= 0;
+            pulse <= 0;
+        end else begin
+            pulse <= (~sig_d & sig_in);  // 1 si antes era 0 y ahora es 1
+            sig_d <= sig_in;             // actualizo valor anterior
+        end
+    end
+endmodule
