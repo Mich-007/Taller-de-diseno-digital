@@ -1,22 +1,18 @@
 
 // El archivo se tiene que llamar: regfile_rv64.sv
 // Banco de registros para RV64I (32 registros de 64 bits)
-// - Lectura doble (rs1, rs2)
-// - Escritura controlada por reg_write
-// - Registro x0 protegido (siempre 0)
-// - Bypass de lectura para simulación
 // ________________________________________________________________________________________________________________________
 
 module regfile_rv64 (
   input  logic         clk,         // Reloj del sistema
-  input  logic         rst,         // Reset síncrono
+  input  logic         rst,             // Reset síncrono
   input  logic         reg_write,   // Señal de escritura: si es 1, se escribe en rd
-  input  logic [4:0]   rd,          // Dirección del registro destino para escribir
-  input  logic [4:0]   rs1,         // Dirección del registro fuente 1 para leer
+  input  logic [4:0]   rd,           // Dirección del registro destino para escribir
+  input  logic [4:0]   rs1,       // Dirección del registro fuente 1 para leer
   input  logic [4:0]   rs2,         // Dirección del registro fuente 2 para leer
-  input  logic [63:0]  rd_data,     // Dato a escribir en rd
+  input  logic [63:0]  rd_data,        // Dato a escribir en rd
   output logic [63:0]  rs1_data,    // Dato leído desde rs1
-  output logic [63:0]  rs2_data     // Dato leído desde rs2
+  output logic [63:0]  rs2_data      // Dato leído desde rs2
 );
 
   // Declaración del banco de registros: 32 registros de 64 bits
@@ -31,7 +27,7 @@ module regfile_rv64 (
       // Si reg_write está activo y rd ≠ 0, se escribe rd_data en regs[rd]
       regs[rd] <= rd_data;
     end
-    // Si rd == 0, no se escribe nada (x0 siempre debe ser 0)
+    // Si rd == 0, no se escribe nada, es 0
   end
 
   // Lectura combinacional con bypass
@@ -42,7 +38,7 @@ module regfile_rv64 (
     else if (reg_write && (rs1 == rd) && (rd != 5'd0))
       rs1_data = rd_data; // Bypass: si se está escribiendo en rs1, devolver el nuevo dato
     else
-      rs1_data = regs[rs1]; // Lectura normal
+      rs1_data = regs[rs1];     // Lectura normal
 
     // Lógica para rs2 que también es idéntica a rs1
     if (rs2 == 5'd0)
