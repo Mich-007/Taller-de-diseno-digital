@@ -16,28 +16,27 @@
 // ________________________________________________________________________________________
 
 module reg_control #(
-  parameter int WIDTH = 32,                  // ancho del bus externo
-  parameter int CNT_WIDTH = 9,               // ancho de los contadores Bytes (9 bits)
-  // Mapa de bits (parámetros para evitar "números mágicos")
-  parameter int BIT_SEND   = 0,              // bit enviar (RW)
-  parameter int BIT_READ   = 1,              // bit leer (RW)
-  parameter int RX_L       = 2,              // inicio Bytes RX (inclusive)
-  parameter int RX_H       = 10,             // fin Bytes RX (inclusive)
+  parameter int WIDTH = 32,               // ancho del bus externo
+  parameter int CNT_WIDTH = 9,          // ancho de los contadores Bytes
+  parameter int BIT_SEND   = 0,           // bit enviar (RW)
+  parameter int BIT_READ   = 1,           // bit leer (RW)
+  parameter int RX_L       = 2,            // inicio Bytes RX
+  parameter int RX_H       = 10,       // fin Bytes RX 
   parameter int TX_L       = 11,             // inicio Bytes TX
-  parameter int TX_H       = 19,             // fin Bytes TX
-  parameter int BIT_FTXF   = 20,             // FIFO TX full (RO)
+  parameter int TX_H       = 19,       // fin Bytes TX
+  parameter int BIT_FTXF   = 20,          // FIFO TX full (RO)
   parameter int BIT_RXAV   = 21              // RX available (RO)
 ) (
   // Señales de reloj / reset
-  input  logic                    i_clk,              // reloj principal
-  input  logic                    i_rst_n,            // reset activo bajo
+  input  logic                    i_clk,    // reloj principal
+  input  logic                    i_rst_n,      // reset activo bajo
 
-  // Interfaz bus externo (agente 32-bit)
-  input  logic                    i_reg_sel,          // 0 -> control, 1 -> data
-  input  logic                    i_wr,               // strobe de escritura
-  input  logic                    i_rd,               // strobe de lectura
-  input  logic [WIDTH-1:0]        i_reg_wr_data,      // datos de escritura (desde agente)
-  output logic [WIDTH-1:0]        o_reg_rd_data,      // datos de lectura (hacia agente)
+  // Interfaz bus externo 
+  input  logic                    i_reg_sel,     // 0 -> control, 1 -> data
+  input  logic                    i_wr,             // strobe de escritura
+  input  logic                    i_rd,           // strobe de lectura
+  input  logic [WIDTH-1:0]        i_reg_wr_data,      // datos de escritura desde el externo
+  output logic [WIDTH-1:0]        o_reg_rd_data,      // datos de lectura desde el externo
 
   // Señales provenientes de las FIFOs / Unidad de Control
   input  logic [CNT_WIDTH-1:0]    i_fifo_tx_count,    // nivel actual FIFO TX
@@ -46,33 +45,35 @@ module reg_control #(
   input  logic                    i_fifo_rx_not_empty, // indicador FIFO RX no vacía
 
   // Bus S/C/DC (control interno) - prioridad sobre WR externo
-  input  logic                    i_scdc_set_send,    // solicitar enviar (set)
-  input  logic                    i_scdc_clear_send,  // clear enviar (auto-clear por UC)
-  input  logic                    i_scdc_set_read,    // solicitar leer (set)
-  input  logic                    i_scdc_clear_read,  // clear leer (auto-clear por UC)
+  input  logic                    i_scdc_set_send,    // solicitar enviar 
+  input  logic                    i_scdc_clear_send,  // clear enviar 
+  input  logic                    i_scdc_set_read,   // solicitar leer 
+  input  logic                    i_scdc_clear_read,  // clear leer (
 
   // Salidas hacia Unidad de Control / módulo datos
-  output logic                    o_send_req,         // petición de iniciar envío (enviar)
-  output logic                    o_read_req,         // petición para extraer 1 byte de RX
-  output logic [CNT_WIDTH-1:0]    o_bytes_tx,         // reflejo fifo_tx_count
-  output logic [CNT_WIDTH-1:0]    o_bytes_rx,         // reflejo fifo_rx_count
-  output logic                    o_ftxf,             // indicador FIFO TX full (RO)
-  output logic                    o_rxav              // indicador FIFO RX has data (RO)
+  output logic                    o_send_req,         // petición de iniciar envío 
+  output logic                    o_read_req,    // petición para extraer 1 byte de RX
+  output logic [CNT_WIDTH-1:0]    o_bytes_tx,         // contadores de cuantos datos hay en la fifo
+  output logic [CNT_WIDTH-1:0]    o_bytes_rx,      // Este igual de cuantos datos hay en la fifo
+  output logic                    o_ftxf,       // indicador FIFO TX de que este lleno
+  output logic                    o_rxav        // indicador FIFO RX de que datos
 );
 
   // ________________________________________________________________________________________
-  // Registros internos - r_ prefix para registros (estado)
+  // Registros internos - r_ se escribe con eso antes para saber que es un registro
   // ________________________________________________________________________________________
-  logic r_send_req;    // registro que mantiene solicitud de enviar (auto-clear por UC)
-  logic r_read_req;    // registro que mantiene solicitud de leer (auto-clear por UC)
+  logic r_send_req;  // registro que mantiene solicitud de enviar 
+  logic r_read_req;    // registro que mantiene solicitud de leer 
+  // estos son registros en el que se guardan las solicitudes de lectura y escritura
 
   // ________________________________________________________________________________________
   // Lógica sincrónica principal
-  // - Actualiza contadores/flags desde las señales FIFO cada ciclo
-  // - Atiende S/C/DC (prioridad) antes que WR externo
-  // - Escritura externa sólo modifica bits writeable (send, read)
+  // - En cada ciclo de actualiza 
+  // - S/C/DC  que este es priodridad antes que WR externo
+  // - Escritura externa sólo modifica bits send, read
   // ________________________________________________________________________________________
   always_ff @(posedge i_clk or negedge i_rst_n) begin
+    //si todo se resetea, todo se resetea tambien desde las solicitudes, lo guardado y todo lo demás.
     if (!i_rst_n) begin
       r_send_req <= 1'b0;
       r_read_req <= 1'b0;
@@ -82,7 +83,7 @@ module reg_control #(
       o_rxav     <= 1'b0;
       o_reg_rd_data <= '0;
     end else begin
-      // Reflejar conteos y flags desde las FIFOs
+      // Si no se esta ne reset entonces, se van actualizando los valores 
       o_bytes_tx <= i_fifo_tx_count;
       o_bytes_rx <= i_fifo_rx_count;
       o_ftxf     <= i_fifo_tx_full;
