@@ -1,4 +1,4 @@
-// Se tiene que llamar reg_control.sv
+
 // Registro de Control del periférico UART (SystemVerilog)
 // Propósito:
 //  - Exponer un registro de control de 32 bits (reg_sel = 0) accesible por el
