@@ -6,13 +6,6 @@
 //  - Reflejar estados y contadores de las FIFOs (Bytes TX/RX de 9 bits).
 //  - Exponer bits auto-limpiables: enviar (send) y leer (read).
 //  - Atender órdenes del bus S/C/DC (prioridad sobre WR externo).
-// Contratos/responsabilidades:
-//  - o_send_req / o_read_req pueden ser solicitados por el agente externo (WR)
-//    o por S/C/DC; la Unidad de Control debe limpiar dichos bits mediante
-//    i_scdc_clear_send / i_scdc_clear_read cuando complete la operación.
-//  - Los campos Bytes TX/RX, FTXF y RXAV son Read-Only desde el agente externo.
-//  - El empaquetado de lectura del registro de control respeta el mapa de bits
-//    parametrizable definido abajo.
 // ________________________________________________________________________________________
 
 module reg_control #(
