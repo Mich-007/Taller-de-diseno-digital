@@ -33,10 +33,10 @@ module reg_control #(
 
   // Interfaz bus externo 
   input  logic                    i_reg_sel,     // 0 -> control, 1 -> data
-  input  logic                    i_wr,             // strobe de escritura
-  input  logic                    i_rd,           // strobe de lectura
+  input  logic                    i_wr,   // escritura
+  input  logic                    i_rd,    // lectura
   input  logic [WIDTH-1:0]        i_reg_wr_data,      // datos de escritura desde el externo
-  output logic [WIDTH-1:0]        o_reg_rd_data,      // datos de lectura desde el externo
+  output logic [WIDTH-1:0]        o_reg_rd_data,  // datos de lectura desde el externo
 
   // Señales provenientes de las FIFOs / Unidad de Control
   input  logic [CNT_WIDTH-1:0]    i_fifo_tx_count,    // nivel actual FIFO TX
@@ -99,10 +99,10 @@ module reg_control #(
       end
       if (i_scdc_clear_read) r_read_req <= 1'b0;
 
-      // Escritura externa (solo cuando i_reg_sel == 0)
+      // Escritura externa, solo cuando i_reg_sel == 0
       if ((i_reg_sel == 1'b0) && i_wr) begin
         // El agente externo puede poner los bits SEND y READ.
-        // S/C/DC ya fue procesado (prioridad).
+        // S/C/DC ya fue procesado ya que es prioridad.
         r_send_req <= i_reg_wr_data[BIT_SEND];
         if (i_reg_wr_data[BIT_READ] && i_fifo_rx_not_empty)
           r_read_req <= 1'b1;
@@ -115,15 +115,14 @@ module reg_control #(
   assign o_read_req = r_read_req;
 
   // ________________________________________________________________________________________
-  // Lógica combinacional de lectura del registro de control
+  // Lógica de lectura de registro
   // - Si se hace RD y reg_sel == 0, empaqueta todos los campos en 32 bits
-  // - Los campos write-only o RO se respetan según mapa
   // ________________________________________________________________________________________
   always_comb begin
-    // por defecto devolvemos 0 cuando no es lectura de control
+    // por defecto devolvemos 0
     o_reg_rd_data = '0;
     if ((i_reg_sel == 1'b0) && i_rd) begin
-      // Empaquetado conforme mapa de bits parametrizable
+      // Empaquetado
       o_reg_rd_data = '0;
       o_reg_rd_data[BIT_SEND] = r_send_req;
       o_reg_rd_data[BIT_READ] = r_read_req;
@@ -133,7 +132,7 @@ module reg_control #(
       o_reg_rd_data[TX_H:TX_L] = o_bytes_tx;
       o_reg_rd_data[BIT_FTXF] = o_ftxf;
       o_reg_rd_data[BIT_RXAV] = o_rxav;
-      // Los bits restantes quedan en 0 (reservados)
+      // Los bits restantes quedan en 0 
     end
   end
 
