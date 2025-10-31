@@ -1,97 +1,57 @@
-`timescale 1ns / 1ps
-module fifos(
-    input  logic reloj_100MHz,     // Reloj de entrada de 100 MHz
-    input  logic reset,            // Reset
-    input  logic [31:0] dato_entrada, // Datos de 32 bits para FIFO TX
-    input  logic habilitar_escritura, // Habilita la escritura en FIFO TX
-    input  logic habilitar_lectura,  // Habilita la lectura en FIFO RX
-    input  logic reg_sel_i,         // Señal reg_sel_i para habilitar lectura y escritura
-    input  logic leer_control,      // Bit "leer" del registro de control
-    output logic [31:0] dato_salida, // Datos de salida de FIFO RX
-    output logic fifo_tx_llena,      // FIFO TX lleno
-    output logic fifo_tx_vacia,      // FIFO TX vacío
-    output logic fifo_rx_llena,      // FIFO RX lleno
-    output logic fifo_rx_vacia,      // FIFO RX vacío
-    output logic [8:0] fifo_tx_contador, // Contador FIFO TX
-    output logic [8:0] fifo_rx_contador // Contador FIFO RX
+`timescale 1ns/1ps
+module top_uart_fifos_demo (
+    input  logic clk_100MHz,
+    input  logic rst,
+
+    // Simula lado CPU/BUS -> TX
+    input  logic [7:0] tx_byte_in,
+    input  logic       tx_wr_pulse,
+
+    // Simula lado UART TX -> pop
+    input  logic       tx_pop_pulse,
+
+    // Simula lado UART RX -> push
+    input  logic [7:0] rx_byte_in,
+    input  logic       rx_push_pulse,
+
+    // Simula lado CPU/BUS <- RX
+    input  logic       rx_rd_pulse,
+
+    output logic [7:0] tx_dout,
+    output logic [7:0] rx_dout,
+    output logic       tx_full, tx_empty,
+    output logic       rx_full, rx_empty,
+    output logic [8:0] tx_count, rx_count
 );
+    logic clk16_tx, lock_tx;
+    logic clk16_rx, lock_rx;
 
-    // Registros internos para el conteo acumulativo de bytes
-    reg [31:0] bytes_tx = 0;  // Contador de bytes transmitidos
-    reg [31:0] bytes_rx = 0;  // Contador de bytes recibidos
-
-    // Señales internas para FIFO TX y RX
-    logic [7:0] dato_tx_entrada;  // Dato de entrada para FIFO TX (8 bits)
-    logic [7:0] dato_rx_salida;   // Dato de salida para FIFO RX (8 bits)
-    logic fifo_tx_full;           // FIFO TX full flag
-    logic fifo_tx_empty;          // FIFO TX empty flag
-    logic fifo_rx_full;           // FIFO RX full flag
-    logic fifo_rx_empty;          // FIFO RX empty flag
-    logic [8:0] fifo_tx_count;    // Contador FIFO TX
-    logic [8:0] fifo_rx_count;    // Contador FIFO RX
-
-    // Instanciación de la FIFO TX (transmisión)
-    FIFO_512 fifo_tx_inst (
-        .reloj_100MHz(reloj_100MHz),  // Reloj de entrada
-        .reset(reset),                // Reset
-        .dato_entrada(dato_tx_entrada), // Entrada de 8 bits
-        .habilitar_escritura(habilitar_escritura & reg_sel_i), // Habilita escritura solo si reg_sel_i = 1
-        .habilitar_lectura(1'b0),     // No se lee de FIFO TX
-        .dato_salida(),               // No se usa salida
-        .fifo_llena(fifo_tx_full),    // FIFO TX lleno
-        .fifo_vacia(fifo_tx_empty),   // FIFO TX vacío
-        .contador_palabras(fifo_tx_count) // Contador de datos en FIFO TX
+    fifo_tx_uart u_tx (
+        .clk_100MHz (clk_100MHz),
+        .rst        (rst),
+        .clk_16MHz  (clk16_tx),
+        .pll_locked (lock_tx),
+        .din        (tx_byte_in),
+        .wr_en      (tx_wr_pulse),
+        .rd_en      (tx_pop_pulse),
+        .dout       (tx_dout),
+        .full       (tx_full),
+        .empty      (tx_empty),
+        .data_count (tx_count)
     );
 
-    // Instanciación de la FIFO RX (recepción)
-    FIFO_512 fifo_rx_inst (
-        .reloj_100MHz(reloj_100MHz),  // Reloj de entrada
-        .reset(reset),                // Reset
-        .dato_entrada(8'b0),          // No se usa dato de entrada (solo lectura)
-        .habilitar_escritura(1'b0),   // No se escribe en FIFO RX
-        .habilitar_lectura(habilitar_lectura), // Habilita la lectura
-        .dato_salida(dato_rx_salida), // Salida de 8 bits de FIFO RX
-        .fifo_llena(fifo_rx_full),    // FIFO RX lleno
-        .fifo_vacia(fifo_rx_empty),   // FIFO RX vacío
-        .contador_palabras(fifo_rx_count) // Contador de datos en FIFO RX
+    fifo_rx_uart u_rx (
+        .clk_100MHz (clk_100MHz),
+        .rst        (rst),
+        .clk_16MHz  (clk16_rx),
+        .pll_locked (lock_rx),
+        .din        (rx_byte_in),
+        .wr_en      (rx_push_pulse),
+        .rd_en      (rx_rd_pulse),
+        .dout       (rx_dout),
+        .full       (rx_full),
+        .empty      (rx_empty),
+        .data_count (rx_count)
     );
-
-    // Actualizar el conteo de bytes en cada ciclo de reloj
-    always_ff @(posedge reloj_100MHz or posedge reset) begin
-        if (reset) begin
-            bytes_tx <= 0;
-            bytes_rx <= 0;
-        end else begin
-            // Incrementar bytes transmitidos cuando se escribe en la FIFO TX
-            if (habilitar_escritura && !fifo_tx_full) begin
-                bytes_tx <= bytes_tx + 1;
-            end
-
-            // Incrementar bytes recibidos cuando se lee de la FIFO RX
-            if (habilitar_lectura && !fifo_rx_empty) begin
-                bytes_rx <= bytes_rx + 1;
-            end
-        end
-    end
-
-    // Mostrar las estadísticas de bytes
-    always_ff @(posedge reloj_100MHz) begin
-        if (habilitar_escritura && !fifo_tx_full) begin
-            $display("ESCRITURA FIFO TX - Dato=0x%02h, Contador=%0d/511, Bytes TX=%0d", dato_entrada, fifo_tx_count, bytes_tx);
-        end
-        if (habilitar_lectura && !fifo_rx_empty) begin
-            $display("LECTURA FIFO RX - Dato=0x%02h, Contador=%0d/511, Bytes RX=%0d", dato_rx_salida, fifo_rx_count, bytes_rx);
-        end
-    end
-
-    // Asignación de las señales externas
-    assign fifo_tx_llena = fifo_tx_full;
-    assign fifo_tx_vacia = fifo_tx_empty;
-    assign fifo_rx_llena = fifo_rx_full;
-    assign fifo_rx_vacia = fifo_rx_empty;
-    assign fifo_tx_contador = fifo_tx_count;
-    assign fifo_rx_contador = fifo_rx_count;
-
 endmodule
-
 
