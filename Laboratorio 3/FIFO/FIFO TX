@@ -1,13 +1,15 @@
-module FIFO_512(
-    input  logic reloj_100MHz,     // Reloj de entrada de 100 MHz (Nexys 4)
-    input  logic reset,            // Reset
-    input  logic [7:0] dato_entrada, // Write data (8-bit)
-    input  logic habilitar_escritura, // Write enable
-    input  logic habilitar_lectura, // Read enable
-    output logic [7:0] dato_salida, // Read data (8-bit)
-    output logic fifo_llena,       // Full flag
-    output logic fifo_vacia,       // Empty flag  
-    output logic [8:0] contador_palabras // Data count (9-bit for 0-512)
+module FIFO(
+  wire clk;
+  wire clk_16MHz;
+  wire [8:0]data_count_0;
+  wire [7:0]data_in;
+  wire [7:0]data_out;
+  wire empty;
+  wire full;
+  wire locked;
+  wire rd_en;
+  wire rst;
+  wire wr_en;
 );
 
     // Señales del Clock Wizard
@@ -29,15 +31,13 @@ module FIFO_512(
     
     // ==================== INSTANCIA FIFO 512 ====================
     fifo_generator_0 fifo_512_inst (
-        .clk(reloj_16MHz),           // Common clock de 16 MHz
-        .srst(reset_fifo),          // Reset solo cuando PLL está listo
-        .din(dato_entrada),          // 8-bit entrada
-        .wr_en(habilitar_escritura), // habilita escritura
-        .rd_en(habilitar_lectura),   // hablita leectura
-        .dout(dato_salida),          // 8-bit salida
-        .full(fifo_llena),           // Fifo llena
-        .empty(fifo_vacia),          // fifo vacía
-        .data_count(contador_palabras) // 9-bit contador de palabras
-    );
-
+       (.clk(clk_16MHz),
+        .data_count(data_count_0),
+        .din(data_in),
+        .dout(data_out),
+        .empty(empty),
+        .full(full),
+        .rd_en(rd_en),
+        .srst(rst),
+        .wr_en(wr_en));
 endmodule
