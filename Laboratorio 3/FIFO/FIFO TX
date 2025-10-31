@@ -1,0 +1,43 @@
+module FIFO_512(
+    input  logic reloj_100MHz,     // Reloj de entrada de 100 MHz (Nexys 4)
+    input  logic reset,            // Reset
+    input  logic [7:0] dato_entrada, // Write data (8-bit)
+    input  logic habilitar_escritura, // Write enable
+    input  logic habilitar_lectura, // Read enable
+    output logic [7:0] dato_salida, // Read data (8-bit)
+    output logic fifo_llena,       // Full flag
+    output logic fifo_vacia,       // Empty flag  
+    output logic [8:0] contador_palabras // Data count (9-bit for 0-512)
+);
+
+    // Señales del Clock Wizard
+    logic reloj_16MHz;
+    logic pll_bloqueado;
+    
+    // ==================== CLOCK WIZARD INSTANCIADO ====================
+    clk_wiz_0 tu_clock_wizard (
+        .clk_out1(reloj_16MHz),    // Reloj de salida 16 MHz
+        .reset(reset),             // Reset
+        .locked(pll_bloqueado),    // Señal de bloqueo
+        .clk_in1(reloj_100MHz)     // Reloj de entrada 100 MHz
+    );
+    
+    // ==================== RESET CONDICIONAL PARA FIFO ====================
+    // Solo resetear el FIFO cuando el PLL esté bloqueado
+    logic reset_fifo;
+    assign reset_fifo = reset | ~pll_bloqueado;
+    
+    // ==================== INSTANCIA FIFO 512 ====================
+    fifo_generator_0 fifo_512_inst (
+        .clk(reloj_16MHz),           // Common clock de 16 MHz
+        .srst(reset_fifo),          // Reset solo cuando PLL está listo
+        .din(dato_entrada),          // 8-bit entrada
+        .wr_en(habilitar_escritura), // habilita escritura
+        .rd_en(habilitar_lectura),   // hablita leectura
+        .dout(dato_salida),          // 8-bit salida
+        .full(fifo_llena),           // Fifo llena
+        .empty(fifo_vacia),          // fifo vacía
+        .data_count(contador_palabras) // 9-bit contador de palabras
+    );
+
+endmodule
