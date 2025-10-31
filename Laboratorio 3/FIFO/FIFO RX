@@ -28,16 +28,14 @@ module FIFO_512(
     assign reset_fifo = reset | ~pll_bloqueado;
     
     // ==================== INSTANCIA FIFO 512 ====================
-    fifo_generator_0 fifo_512_inst (
-        .clk(reloj_16MHz),           // Common clock de 16 MHz
-        .srst(reset_fifo),          // Reset solo cuando PLL está listo
-        .din(dato_entrada),          // 8-bit entrada
-        .wr_en(habilitar_escritura), // habilita escritura
-        .rd_en(habilitar_lectura),   // hablita leectura
-        .dout(dato_salida),          // 8-bit salida
-        .full(fifo_llena),           // Fifo llena
-        .empty(fifo_vacia),          // fifo vacía
-        .data_count(contador_palabras) // 9-bit contador de palabras
-    );
+       (.clk(clk_16MHz),
+        .data_count(data_count_0),
+        .din(data_in),
+        .dout(data_out),
+        .empty(empty),
+        .full(full),
+        .rd_en(rd_en),
+        .srst(rst),
+        .wr_en(wr_en));
 
 endmodule
