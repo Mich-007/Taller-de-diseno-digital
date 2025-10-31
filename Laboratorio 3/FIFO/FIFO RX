@@ -1,43 +1,56 @@
-module FIFO_RX(
-  wire clk;
-  wire clk_16MHz;
-  wire [8:0]data_count_0;
-  wire [7:0]data_in;
-  wire [7:0]data_out;
-  wire empty;
-  wire full;
-  wire locked;
-  wire rd_en;
-  wire rst;
-  wire wr_en;
+`timescale 1ns/1ps
+// fifo_rx_uart.sv
+// RX: el UART escribe bytes recibidos; la CPU/BUS hace pop para leerlos.
+// Se usa FWFT para que el primer byte quede disponible inmediatamente.
+
+module fifo_rx_uart (
+    input  logic        clk_100MHz,  // reloj de placa
+    input  logic        rst,         // reset síncrono activo en 1 (a clk_100MHz)
+    output logic        clk_16MHz,   // mismo 16 MHz para el bloque UART
+    output logic        pll_locked,
+
+    // Interfaz de escritura (lado UART RX)
+    input  logic [7:0]  din,         // byte recibido
+    input  logic        wr_en,       // pulso cuando el RX tiene un byte válido
+
+    // Interfaz de lectura (lado CPU/BUS)
+    input  logic        rd_en,       // pop del siguiente byte
+    output logic [7:0]  dout,        // dato hacia la CPU/BUS
+
+    // Estado
+    output logic        full,
+    output logic        empty,
+    output logic [8:0]  data_count   // ocupación 0..512
 );
+    // ------------------ Clocking ------------------
+    logic srst;
 
-    // Señales del Clock Wizard
-    logic reloj_16MHz;
-    logic pll_bloqueado;
-    
-    // ==================== CLOCK WIZARD INSTANCIADO ====================
-    clk_wiz_0 tu_clock_wizard (
-        .clk_out1(reloj_16MHz),    // Reloj de salida 16 MHz
-        .reset(reset),             // Reset
-        .locked(pll_bloqueado),    // Señal de bloqueo
-        .clk_in1(reloj_100MHz)     // Reloj de entrada 100 MHz
+    clk_wiz_0 u_clk (
+        .clk_in1 (clk_100MHz),
+        .reset   (rst),
+        .clk_out1(clk_16MHz),     // 16 MHz
+        .locked  (pll_locked)
     );
-    
-    // ==================== RESET CONDICIONAL PARA FIFO ====================
-    // Solo resetear el FIFO cuando el PLL esté bloqueado
-    logic reset_fifo;
-    assign reset_fifo = reset | ~pll_bloqueado;
-    
-    // ==================== INSTANCIA FIFO 512 ====================
-       (.clk(clk_16MHz),
-        .data_count(data_count_0),
-        .din(data_in),
-        .dout(data_out),
-        .empty(empty),
-        .full(full),
-        .rd_en(rd_en),
-        .srst(rst),
-        .wr_en(wr_en));
 
+    assign srst = rst | ~pll_locked;
+
+    // ------------------ FIFO Generator (RX) ------------------
+    // Configuración de la IP en Vivado (idéntica a TX salvo FWFT):
+    // - Interface: Native
+    // - Common Clock (synchronous)
+    // - Data width: 8
+    // - Depth: 512 (BRAM)
+    // - First Word Fall-Through: ACTIVADO (FWFT)
+    // - Habilitar puertos: full, empty, data_count, srst
+    fifo_rx_core u_fifo_rx (
+        .clk        (clk_16MHz),
+        .srst       (srst),
+        .din        (din),
+        .wr_en      (wr_en),
+        .rd_en      (rd_en),
+        .dout       (dout),
+        .full       (full),
+        .empty      (empty),
+        .data_count (data_count)
+    );
 endmodule
