@@ -25,16 +25,17 @@ module Control #(
     output logic                    i_scdc_clear_read,  // clear leer
     
     input logic  [4:0]              FIFOposicion,
-    output logic [4:0]              leer_index,
-    output logic                    leer_ahora,
+    output logic [4:0]              leer_index,   // indice
+    output logic                    leer_ahora,   // solicitud, es un ppulso
     
     output logic [CNT_WIDTH-1:0]    o_bytes_tx,         // contadores de cuantos datos hay en la fifo
     output logic [CNT_WIDTH-1:0]    o_bytes_rx,      // Este igual de cuantos datos hay en la fifo
-    input logic  [15:0]             SW, leer_data,
-    input logic  [3:0]              BTN,
+    input logic  [15:0]             SW, leer_data,   // entradas de switches
+    input logic  [3:0]              BTN,  
     
-    input  logic [WIDTH-1:0]        i_reg_wr_data,   // datos de escritura(tx)
-    input logic [WIDTH-1:0]         o_reg_rd_data,  // datos de lectura desde el externo(rx)
+    input  logic [WIDTH-1:0]        i_reg_wr_data,   // datos de escritura(tx), son bus de 32 bits
+    input logic [WIDTH-1:0]         o_reg_rd_data,  // datos de lectura desde el externo(rx), igual
+// señales para manejar el display
     output logic [15:0]             DisplayValor, LED,
     output logic [1:0]              op_lat,
     output logic                    PulsoMitad, PulsoFin, Displayiniciar, DisplayDone        
@@ -44,19 +45,22 @@ module Control #(
     import fsm_pkg::*;
     typedef enum logic [2:0] {R_Espera, R_SetIndex,R_EsperaDato, R_Pausa, R_Index} r_estado;
  
-// -------------------------------------------------------------------
+// _________________________________________________________________________________________
 //Configuración de estados
-// -------------------------------------------------------------------
-    estado_t estado_actual = S_Espera, estado_siguiente;
-    estado_t origen_display;
+
+    estado_t estado_actual = S_Espera, estado_siguiente; //inicia en espera
+    estado_t origen_display;  //guarda en que estado se empieza la pantalla
         
-    always_ff @(posedge clk or posedge reset) begin
+    always_ff @(posedge clk or posedge reset) begin    
+
         if (reset) begin 
             estado_actual <= S_Espera;
         end else begin     
             estado_actual <= estado_siguiente;
             end
         end
+
+//trasición al display y se guarda en el origen del display el estado actual, en reset lo inicia
         
     always_ff @(posedge clk or posedge reset) begin
         if (reset) origen_display <= S_Espera;
@@ -64,6 +68,9 @@ module Control #(
             origen_display <= estado_actual;
         end       
 
+
+
+//declaraciones y los dos bloques abajo actualizan r_estado_q
     r_estado estadoregistro;
     r_estado r_estado_q;
     
@@ -74,14 +81,20 @@ module Control #(
     always_ff @(posedge clk or posedge reset)
         if (reset) r_estado_q <= R_Espera;
         else       r_estado_q <= estadoregistro;
- // -------------------------------------------------------------------
+
+
+ // _______________________________________________________________________
     // Modo Registro   
- // -------------------------------------------------------------------
+
     logic i_rd;
+//detecta flancoco de subida sw1_dn y lo compara con sw_db_d1 esta retardada
     assign i_rd = sw1_db & ~sw_db_d1;
-    logic [4:0] base_index;   //  ndice del m s antiguo
-    logic [5:0] k;          // cu ntos llevamos mostrados
-    logic [7:0] data_registro;
+//variables
+    logic [4:0] base_index;   // indice de la posicion FIFO y conteo RX
+    logic [5:0] k;          // contador de cuantos lementos llevamos mostrados
+    logic [7:0] data_registro; // buffer del byte leído.
+
+//señales combinacionales
     wire modo_registro = (estado_actual == S_RegistroActual) && (estado_siguiente == S_Display);
     wire displayFSM = (estado_actual != S_Display)&& (estado_siguiente == S_Display);
     wire displayregistro = (r_estado_q != R_Pausa) && (estadoregistro == R_Pausa);
