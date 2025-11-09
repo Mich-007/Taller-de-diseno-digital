@@ -1,22 +1,22 @@
 `timescale 1ns / 1ps
 
 module Display_7seg_32bits(
-    input  logic clk,               // reloj de 100 MHz
-    input  logic [31:0] data,       // datos de 32 bits (8 dígitos hexadecimales)
+    input  logic clk,               // reloj
+    input  logic [31:0] data,       // datos de 32 bits (8 dÃ­gitos hexadecimales)
     input  logic enable,            // 1 = encendido, 0 = apagado
-    output logic [7:0] an,          // 8 ánodos activos bajos
-    output logic [7:0] seg          // segmentos (a-g + punto)
+    output logic [7:0] an,          // 8 Ã¡nodos activos bajos
+    output logic [7:0] seg          // segmentos
 );
 
     // ------------------------------------------------------------
-    // Señales internas
+    // SeÃ±ales internas
     // ------------------------------------------------------------
-    logic [2:0] sel;                // selector del dígito actual (0-7)
+    logic [2:0] sel;                // selector del dÃ­gito actual (0-7)
     logic [3:0] nibble;             // nibble actual para convertir
     logic [19:0] refresh_counter;   // controla velocidad del multiplexado
 
     // ------------------------------------------------------------
-    // Tabla de segmentos (para cátodo común, invertir si usas ánodo común)
+    // Tabla de segmentos 
     // ------------------------------------------------------------
     function [6:0] seg_map(input [3:0] val);
         case (val)
@@ -41,15 +41,15 @@ module Display_7seg_32bits(
     endfunction
 
     // ------------------------------------------------------------
-    // Contador para multiplexado (ajustado para 100 MHz)
+    // Contador para multiplexado 
     // ------------------------------------------------------------
     always_ff @(posedge clk) begin
         refresh_counter <= refresh_counter + 1;
-        sel <= refresh_counter[19:17];   // cambia de dígito cada ~1.3 ms aprox.
+        sel <= refresh_counter[19:17];
     end
 
     // ------------------------------------------------------------
-    // Selección del nibble correspondiente al dígito activo
+    // SelecciÃ³n del nibble correspondiente al dÃ­gito activo
     // ------------------------------------------------------------
     always_comb begin
         case (sel)
@@ -66,14 +66,14 @@ module Display_7seg_32bits(
     end
 
     // ------------------------------------------------------------
-    // Control de ánodos (activos bajos)
+    // Control de Ã¡nodos
     // ------------------------------------------------------------
     always_comb begin
         if (enable) begin
             an = 8'b11111111;
-            an[sel] = 1'b0; // activa solo el dígito actual
+            an[sel] = 1'b0; // activa solo el dÃ­gito actual
         end else begin
-            an = 8'b11111111; // apaga todos los dígitos
+            an = 8'b11111111; // apaga todos los dÃ­gitos
         end
     end
 
