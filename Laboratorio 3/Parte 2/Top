@@ -1,0 +1,251 @@
+`timescale 1ns / 1ps
+module Top_UART_FIFO #(
+    parameter bit Simulacion = 0, 
+    parameter int CLK_HZ = Simulacion ? 100_000_000 : 16_000_000,
+    parameter int DEBOUNCE_MS  = 10     
+)(
+    input logic         clk_100MHz, reset,
+    input logic  [15:0] SW,  
+    output logic [6:0]  SEG, 
+    output logic [7:0]  AN,
+    output logic [15:0] LED,
+    input logic  [3:0]  BTN,
+    
+    input wire  rx,
+    output wire tx
+    );
+//---------------------------------------------   
+//Reloj y reset reales y para simulacion
+//---------------------------------------------    
+    logic clk_16MHz;
+    logic locked;
+    logic rst_sync16;
+    logic clk_16MHz_hw, locked_hw;
+//---------------------------------------------   
+//Señales de switch o boton
+//---------------------------------------------   
+    logic sw0_db, sw_db_d0, sw1_db, sw_db_d1;
+    
+//=== Botones ===
+    logic       wr_en, rd_en_one;               //indica que se escriba en FIFO TX
+    logic       enviar_en, leer_en;
+//---------------------------------------------   
+//Señales internas
+//---------------------------------------------
+
+//=== FIFO RX ===
+    logic [7:0] rx_data_in;     //Datos que entran al FIFO RX 
+    logic [7:0] rx_dout;        //Datos que salen de FIFO RX
+    logic       rx_rd_en;       //Activa lectura de FIFO RX
+    logic       rx_full;        //Pulso indica que FIFO RX está llena
+    logic       rx_data_rdy;
+    logic       rx_valid;
+    logic       rx_empty;       //Pulso FIFO RX esta vacio
+    logic       RXAV;           //RX tiene al menos un dato
+    logic [8:0] BytesRX;        //Contador de RX para display
+    
+//=== FIFO TX ===
+    logic [7:0] last_wr_byte;
+    logic       tx_busy;
+    logic       tx_start;
+    logic [7:0] tx_data_in;
+    logic [7:0] tx_dout;
+    logic       tx_valid;
+    logic       tx_rdy;
+    logic       tx_rd_en;
+    logic       tx_full;
+    logic       tx_empty;
+    logic [8:0] BytesTX;
+    logic       FTFX;//TX esta llena
+    
+//=== Display ===
+    logic [7:0] DisplayValor;
+    logic       Displayiniciar;
+    logic       PulsoFin;
+    logic       PulsoMitad;
+
+
+clk_wiz_0 uCl(
+  .clk_out1 (clk_16MHz_hw), //CLK externo
+  .reset    (reset),        // reset del wizard = reset externo
+  .locked   (locked_hw),
+  .clk_in1  (clk_100MHz)
+);
+
+// Valores para simulacion
+assign clk_16MHz = (Simulacion) ? clk_100MHz  : clk_16MHz_hw;
+assign locked    = (Simulacion) ? 1'b1        : locked_hw;
+assign rst_sync16= (Simulacion) ? reset       : (reset | ~locked_hw);
+
+    //Control de UART lidia con las señales internas que le entrega el Registro
+    Control_UART #(.Simulacion(Simulacion),
+                   .CLK_HZ(CLK_HZ))uC(
+        .clk        (clk_16MHz),
+        .reset      (rst_sync16),
+        .LED        (LED),
+        .sw0_db     (sw0_db), 
+        .sw_db_d0   (sw_db_d0),
+        .sw1_db     (sw1_db), 
+        .sw_db_d1   (sw_db_d1),
+        
+        
+        //pulso de escritura
+        .rd_en_one(rd_en_one),
+        .wr_en       (wr_en),             //Pulso para escribir en la FIFO TX
+        .leer_en    (leer_en),
+        .enviar_en   (enviar_en),
+        
+        //FIFO RX
+        .rx_rd_en   (rx_rd_en),             //Pulso que saca un valor de RX
+        .rx_dout    (rx_dout),              //Valor de salida de RX
+        .rx_valid   (rx_valid),             //Indica que el valor de FIFO RX esta estable
+        .RXAV       (RXAV),                 //indica que hay al menos un dato en RX
+        .BytesRX    (BytesRX),
+        //FIFO TX   
+        .last_wr_byte(last_wr_byte), 
+        .tx_rdy     (tx_rdy),
+        .tx_busy    (tx_busy),              //FIFO TX esta ocupada
+        .tx_start   (tx_start),             //Pulso para iniciar FIFO TX
+        .tx_rd_en   (tx_rd_en),             //Pulso para sacar un valor de TX 
+        .tx_valid   (tx_valid),             //Validacion de FIFO tx
+        .tx_empty   (tx_empty),             //Pulso que indica que TX esta vacia
+        .BytesTX    (BytesTX),               //Contador de datos dentro de TX
+        
+        //Display
+        .Displayiniciar (Displayiniciar),   //Pulso activa el display
+        .PulsoMitad     (PulsoMitad),       //Pulso indica que el display ha estado un segundo encendido
+        .PulsoFin       (PulsoFin),         //Pulso indica que el display setuvo encendido dos segundos
+        .DisplayValor   (DisplayValor)      //El valor que debe mostrar el display
+    );
+    
+// -------------------------------------------------------------------
+//FIFO RX
+// -------------------------------------------------------------------        
+    fifo_rx_uart uRX(
+        .clk_16MHz  (clk_16MHz),            //Reloj
+        .rst        (rst_sync16),           //Reset
+        .pll_locked (locked),               //Locked del Clocking Wizard
+        .din        (rx_data_in),           //Datos que entran al FIFO RX desde rx
+        .rd_en      (rx_rd_en),             //Pulso para sacar un dato de RX
+        .wr_en      (rx_data_rdy),          //Pulso de que el dato está listo
+        .dout       (rx_dout),              //Valor que sale de RX
+        .full       (rx_full),              //Pulso FIFO RX esta llena
+        .empty      (rx_empty),             //Pulso FIFO RX esta vacia
+        .data_count (BytesRX),              //Contador de datos dentro de RX
+        .valid      (rx_valid)              //Pulso de RX valido
+    );
+
+assign RXAV = ~rx_empty;
+// -------------------------------------------------------------------
+//FIFO TX
+// -------------------------------------------------------------------        
+    fifo_tx_uart uTX(
+        .clk_16MHz  (clk_16MHz),             //Reloj
+        .rst        (rst_sync16),            //Reset
+        .pll_locked (locked),                //El locked del Cloking Wizard
+        .din        (tx_data_in),            //Datos que están entrando desde Real Term
+        .rd_en      (tx_rd_en),              //Pulso para sacar un dato de FIFO TX
+        .wr_en      (wr_en),                //Pulso de escritura
+        .dout       (tx_dout),               //Dato que sale de FIFO TX por tx
+        .full       (tx_full),               //Indica que TX esta llena
+        .empty      (tx_empty),              //Indica que FIFO TX esta vacia
+        .data_count (BytesTX),               //Contador de datos dentro de TX
+        .valid      (tx_valid)               //Pulso de que el valor de FIFO es valido
+     );
+
+assign FTFX = tx_full;     
+// -------------------------------------------------------------------
+//UART
+// -------------------------------------------------------------------  
+   
+
+    UART uA(
+        .clk        (clk_16MHz),            //Reloj
+        .reset      (rst_sync16),           //Reset
+        .tx_start   (tx_start),             //Pulso que activa FIFO TX
+        .tx_rdy     (tx_rdy),               //Indica que que esta lista para recibir TX
+        .rx_data_rdy(rx_data_rdy),          //Indica que esta lista para recibir otro RX
+        .data_in    (tx_dout),              //Dato que salio de TX
+        .data_out   (rx_data_in),           //Dato de entrada hacia RX
+        .tx_busy    (tx_busy),              //Indica que la UART esta ocupada
+        .rx         (rx),                   //Conexión física donde se recibe rx
+        .tx         (tx)                    //Conexion fisica donde se transmite informacion
+    );
+    
+// -------------------------------------------------------------------
+//Display
+// -------------------------------------------------------------------        
+    Display uD(
+        .clk            (clk_16MHz), 
+        .reset          (rst_sync16) ,      //reloj y reset
+        .SEG            (SEG),              //los 7 segmentos físicos del display
+        .AN             (AN),               //los 7 anodos correspondientes en el display
+        .Displayiniciar (Displayiniciar),   //pulso: activa el display
+        .PulsoMitad     (PulsoMitad),       //pulso: indica que el display ha estado un segundo encendido
+        .PulsoFin       (PulsoFin),         //pulso:indica que el display setuvo encendido dos segundos
+        .DisplayValor   (DisplayValor)      //el valor que debe mostrar el display
+    
+
+    );
+    
+// -------------------------------------------------------------------
+//Antirrebotes
+// -------------------------------------------------------------------    
+    Antirrebote_Switch #(
+        .Simulacion(Simulacion),
+        .CLK_HZ(CLK_HZ), 
+        .DEBOUNCE_MS_HW(5)
+    )       deb_sw (
+        .clk(clk_16MHz),
+        .reset(rst_sync16),
+        .SW(SW),
+        .sw0_db(sw0_db),
+        .sw_db_d0(sw_db_d0),
+        .sw1_db(sw1_db),
+        .sw_db_d1(sw_db_d1)
+);
+        
+logic        reg_sel_i, wr_i;
+logic [31:0] entrada_i, salida_o;
+
+// Instancia del IF de registros
+uart_reg_if #(.SIM(Simulacion)) uIF (
+  .clk       (clk_16MHz),
+  .reset     (rst_sync16),
+
+  .reg_sel_i (reg_sel_i),
+  .wr_i      (wr_i),
+  .entrada_i (entrada_i),
+  .salida_o  (salida_o),
+
+  // Estado desde tus FIFOs/UART
+  .RXAV      (RXAV),
+  .FTXF      (FTFX),
+  .BytesRX   (BytesRX),
+  .BytesTX   (BytesTX),
+  .rx_dout   (rx_dout),
+  .rx_valid_pulse (rx_valid),   // ya tenés rx_valid_pulse
+  .tx_busy   (tx_busy),
+
+  // Acciones hacia tu lógica
+  .wr_en     (wr_en),           // ya lo usabas para FIFO TX
+  .tx_data_in(tx_data_in),      // ya lo tenías
+  .last_wr_byte(last_wr_byte),  
+  .enviar_en (enviar_en),       // reemplaza tu botón "enviar"
+  .leer_en   (leer_en),          // reemplaza tu botón "leer"
+  .rd_en_one(rd_en_one)
+);
+       
+       host_buttons_to_bus #(.CLK_HZ(16_000_000)) uHost (
+  .clk       (clk_16MHz),
+  .reset     (rst_sync16),
+  .SW        (SW),
+  .BTN       (BTN),
+  .reg_sel_i (reg_sel_i),
+  .wr_i      (wr_i),
+  .entrada_i (entrada_i),
+  .salida_o  (salida_o),
+  .status_o  (),          // si quieres, cablea a LED o al Display
+  .dato_leido()           // idem
+);
+endmodule
