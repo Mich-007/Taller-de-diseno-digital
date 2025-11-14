@@ -1,0 +1,264 @@
+`timescale 1ns/1ps
+
+// ===================================================================================
+// TESTBENCH COMPLETO para Top_UART_FIFO  (Simulacion = 1)
+// ===================================================================================
+module tb_top_uart_fifo_full;
+
+  // ------------------------
+  // Señales DUT
+  // ------------------------
+  logic        clk;            // clk_100MHz del TOP
+  logic        reset;
+  logic [15:0] SW;
+  logic [3:0]  BTN;
+  wire  [6:0]  SEG;
+  wire  [7:0]  AN;
+  wire  [15:0] LED;
+  wire         tx, rx;
+
+  // ------------------------
+  // Instancia del TOP con Simulacion=1
+  // ------------------------
+  Top_UART_FIFO #(.Simulacion(1)) uut (
+    .clk_100MHz (clk),
+    .reset      (reset),
+    .SW         (SW),
+    .SEG        (SEG),
+    .AN         (AN),
+    .LED        (LED),
+    .BTN        (BTN),
+    .rx         (rx),
+    .tx         (tx)
+  );
+
+  // ------------------------
+  // Reloj de 100 MHz
+  // ------------------------
+  initial clk = 1'b0;
+  always  #5 clk = ~clk; // 10 ns ? 100 MHz
+
+  // ------------------------
+  // Loopback UART (PC ? FPGA)
+  // ------------------------
+  // En sim conectamos tx?rx
+  assign rx = tx;
+
+  // ------------------------
+  // Helpers de tiempo/estímulos a 16 MHz internos del DUT
+  // ------------------------
+  // En Simulacion=1, clk_16MHz = clk_100MHz en tu TOP, pero
+  // de todas maneras usamos el nodo interno para esperar flancos
+  wire clk16 = uut.clk_16MHz;
+
+  task automatic wait_clks16(input int n);
+    repeat (n) @(posedge clk16);
+  endtask
+
+  // Pulso de botón (BTN[i]) de 'cycles_hi' ciclos a 16 MHz
+  task automatic press_btn(input int i, input int cycles_hi = 4);
+    @(negedge clk16);
+    BTN = '0;
+    BTN[i] = 1'b1;
+    wait_clks16(cycles_hi);
+    @(negedge clk16);
+    BTN[i] = 1'b0;
+    wait_clks16(2);
+  endtask
+
+  // SW1 = 0 ? modo unitario; SW1 = 1 ? modo ráfaga
+  task automatic set_mode_unitario(input bit unitario);
+    @(negedge clk16);
+    // limpiar otros switches por sanidad
+    SW = '0;
+    SW[1] = (unitario ? 1'b0 : 1'b1);
+    // El antirrebote de switches en sim usa 2 ticks: espera un poco
+    wait_clks16(6);
+  endtask
+
+  // Escribir un byte (BTN0) en la FIFO-TX a través del host_buttons_to_bus
+  task automatic wr_byte(input byte b);
+    @(negedge clk16);
+    // host usa SW[15:8] como dato
+    SW[15:8] = b;
+    wait_clks16(1);
+    $display("[%0t] WR_ONE -> 0x%02h ('%s')",
+             $time, b, (b>=8'h20 && b<=8'h7E)?{b}:"." );
+    press_btn(0);  // BTN0: escribir dato en REG_DATOS (push FIFO-TX)
+  endtask
+
+  // Enviar TODO (ráfaga TX): BTN2
+  task automatic enviar_todo();
+    $display("[%0t] ENVIAR_TODO (BTN2)", $time);
+    press_btn(2);
+  endtask
+
+  // Leer UNO (unitario RX): BTN3
+  task automatic leer_uno();
+    $display("[%0t] LEER_UNO (BTN3)", $time);
+    press_btn(3);
+  endtask
+
+  // Leer TODO (ráfaga RX): BTN3 una vez, la FSM debe drenar RX si hay datos
+  task automatic leer_todo();
+    $display("[%0t] LEER_TODO (BTN3)", $time);
+    press_btn(3);
+  endtask
+
+  // ------------------------
+  // Monitor de señales internas útiles
+  // (Ajusta nombres si tu jerarquía difiere.)
+  // ------------------------
+  // Mapeos internos (pueden cambiar si renombraste en Top)
+  wire        tx_empty_w   = uut.tx_empty;
+  wire        tx_valid_w   = uut.tx_valid;
+  wire        tx_rdy_w     = uut.tx_rdy;
+  wire        tx_start_w   = uut.tx_start;
+  wire        tx_rd_en_w   = uut.tx_rd_en;
+  wire        tx_busy_w    = uut.tx_busy;
+  wire [8:0]  BytesTX_w    = uut.BytesTX;
+
+  wire        RXAV_w       = uut.RXAV;
+  wire        rx_valid_w   = uut.rx_valid;
+  wire [8:0]  BytesRX_w    = uut.BytesRX;
+
+  wire [7:0]  tx_dout_w    = uut.tx_dout;
+  wire [7:0]  rx_dout_w    = uut.rx_dout;
+
+  // Estado de la FSM de Control_UART
+  // (Se asume instancia 'uC' dentro del TOP)
+  wire [4:0]  st_w         = uut.uC.estado_actual;
+
+  // Para imprimir nombre del estado
+  typedef enum logic [4:0] {
+    S_IDLE, S_EsperaBTN, S_EsperaBTN1, S_WR, S_RD, S_WAIT_RD,
+    S_LATCH_RD, S_RX, S_WAIT_RX, S_LATCH_RX, S_TX, S_TX_POP,
+    S_TX_WAIT_DATA, S_TX_LATCH, S_TX_FIRE, S_TX_BUSY, S_Display
+  } estado_t;
+
+  function string fsm_name(input estado_t s);
+    case (s)
+      S_IDLE:          fsm_name="S_IDLE";
+      S_EsperaBTN:     fsm_name="S_EsperaBTN";
+      S_EsperaBTN1:    fsm_name="S_EsperaBTN1";
+      S_WR:            fsm_name="S_WR";
+      S_RD:            fsm_name="S_RD";
+      S_WAIT_RD:       fsm_name="S_WAIT_RD";
+      S_LATCH_RD:      fsm_name="S_LATCH_RD";
+      S_RX:            fsm_name="S_RX";
+      S_WAIT_RX:       fsm_name="S_WAIT_RX";
+      S_LATCH_RX:      fsm_name="S_LATCH_RX";
+      S_TX:            fsm_name="S_TX";
+      S_TX_POP:        fsm_name="S_TX_POP";
+      S_TX_WAIT_DATA:  fsm_name="S_TX_WAIT_DATA";
+      S_TX_LATCH:      fsm_name="S_TX_LATCH";
+      S_TX_FIRE:       fsm_name="S_TX_FIRE";
+      S_TX_BUSY:       fsm_name="S_TX_BUSY";
+      S_Display:       fsm_name="S_Display";
+      default:         fsm_name=$sformatf("UNK(%0d)", s);
+    endcase
+  endfunction
+
+  estado_t st_q;
+  logic tx_empty_q, tx_valid_q, tx_start_q, tx_rdy_q, tx_rd_en_q, tx_busy_q;
+  logic [8:0] BytesTX_q, BytesRX_q;
+  logic rx_valid_q, RXAV_q;
+
+  always @(posedge clk16) begin
+    if (st_q !== st_w) begin
+      st_q <= estado_t'(st_w);
+      $display("[%0t] FSM -> %s", $time, fsm_name(estado_t'(st_w)));
+    end
+    if (tx_empty_q !== tx_empty_w) begin
+      tx_empty_q <= tx_empty_w;
+      $display("[%0t] TX.empty = %0b", $time, tx_empty_w);
+    end
+    if (tx_valid_q !== tx_valid_w) begin
+      tx_valid_q <= tx_valid_w;
+      if (tx_valid_w)
+        $display("[%0t] TX.valid byte=0x%02h", $time, tx_dout_w);
+    end
+    if (tx_rd_en_q !== tx_rd_en_w) begin
+      tx_rd_en_q <= tx_rd_en_w;
+      if (tx_rd_en_w)
+        $display("[%0t] TX.rd_en (POP)  BytesTX=%0d->%0d", $time, BytesTX_w, BytesTX_w-1);
+    end
+    if (tx_start_q !== tx_start_w) begin
+      tx_start_q <= tx_start_w;
+      if (tx_start_w)
+        $display("[%0t] TX.start (tx_rdy=%0b, tx_busy=%0b)", $time, tx_rdy_w, tx_busy_w);
+    end
+    if (tx_rdy_q !== tx_rdy_w) begin
+      tx_rdy_q <= tx_rdy_w;
+      $display("[%0t] TX.rdy = %0b", $time, tx_rdy_w);
+    end
+    if (tx_busy_q !== tx_busy_w) begin
+      tx_busy_q <= tx_busy_w;
+      $display("[%0t] TX.busy = %0b", $time, tx_busy_w);
+    end
+    if (BytesTX_q !== BytesTX_w) begin
+      BytesTX_q <= BytesTX_w;
+      $display("[%0t] BytesTX = %0d", $time, BytesTX_w);
+    end
+
+    if (RXAV_q !== RXAV_w) begin
+      RXAV_q <= RXAV_w;
+      $display("[%0t] RX.AV = %0b", $time, RXAV_w);
+    end
+    if (rx_valid_q !== rx_valid_w) begin
+      rx_valid_q <= rx_valid_w;
+      if (rx_valid_w)
+        $display("[%0t] RX.valid byte=0x%02h  BytesRX=%0d", $time, rx_dout_w, BytesRX_w);
+    end
+    if (BytesRX_q !== BytesRX_w) begin
+      BytesRX_q <= BytesRX_w;
+      $display("[%0t] BytesRX = %0d", $time, BytesRX_w);
+    end
+  end
+
+  // ------------------------
+  // Estímulos
+  // ------------------------
+  initial begin
+    // Init
+    SW    = '0;
+    BTN   = '0;
+    reset = 1;
+    wait_clks16(8);
+    reset = 0;
+    wait_clks16(8);
+
+    // =========================================================================
+    // 1) MODO UNITARIO (SW1=0): escribir UN byte y leer UN byte
+    // =========================================================================
+    set_mode_unitario(1'b1);        // SW1=0 ? unitario
+    wr_byte(8'h41);                 // 'A' (BTN0 -> push a FIFO-TX vía host)
+    // NOTA: S_WR mostrará el último escrito si lo conectaste como te sugerí
+    leer_uno();                     // BTN3 -> leer 1 byte de FIFO-RX
+    wait_clks16(50);
+
+    // =========================================================================
+    // 2) MODO RÁFAGA (SW1=1): cargar varios bytes, enviar todo y leer todo
+    // =========================================================================
+    set_mode_unitario(1'b0);        // SW1=1 ? ráfaga
+    wr_byte(8'h42);                 // 'B'
+    wr_byte(8'h33);                 // '3'
+    wr_byte(8'h06);                 // 0x06
+    wr_byte(8'h7E);                 // '~'
+    wait_clks16(20);
+
+    enviar_todo();                  // BTN2 -> S_TX (envía toda la FIFO-TX)
+    // Esperar a que TX se vacíe
+    wait (uut.BytesTX == 0);
+    $display("[%0t] TX FIFO vacía", $time);
+
+    leer_todo();                    // BTN3 -> S_RX, debería drenar FIFO-RX en bucle
+    wait (uut.BytesRX == 0);
+    $display("[%0t] RX FIFO vacía", $time);
+
+    wait_clks16(100);
+    $display("[%0t] FIN DE PRUEBA", $time);
+    $stop;
+  end
+
+endmodule
