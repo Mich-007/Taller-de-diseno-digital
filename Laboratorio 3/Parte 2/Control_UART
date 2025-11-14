@@ -1,0 +1,307 @@
+`timescale 1ns/1ps 
+
+package fsm_pkg; 
+typedef enum logic [4:0] 
+{ S_IDLE, S_EsperaBTN, S_EsperaBTN1, S_WR, S_RX_GAP, S_RD, S_WAIT_RD,S_LATCH_RD, S_RX, S_WAIT_RX,S_LATCH_RX, S_TX, S_TX_POP, S_TX_WAIT_DATA, S_TX_LATCH, S_TX_FIRE,S_TX_BUSY, S_Display } 
+estado_t; 
+endpackage 
+
+module Control_UART#( 
+    parameter bit Simulacion = 0, 
+    parameter int CLK_HZ = 16_000_000) 
+(   
+//=== Elementos de la FPGA ===  
+    input logic         clk, reset, 
+    output logic [15:0] LED, 
+    input logic modo_txrx,
+
+
+input logic [7:0] last_wr_byte,
+//=== Antirrebotes ===  
+    input logic         sw0_db, sw_db_d0, sw1_db, sw_db_d1, 
+    
+//=== Botones ===  
+    input logic         wr_en,
+    input logic         enviar_en,
+    input logic         leer_en,
+    input logic         rd_en_one,
+    
+//=== FIFO RX ===
+    input logic [7:0]   rx_dout, 
+    input logic         RXAV, 
+    input logic         rx_valid, 
+    
+    output logic        rx_rd_en, 
+    
+//=== FIFO TX ===
+    input logic         tx_busy,
+    input logic         tx_valid, 
+    input logic         tx_empty, 
+    input logic [8:0]   BytesTX,
+    input  logic         tx_rdy,
+    input logic [8:0]   BytesRX,
+    
+    output logic        tx_start, 
+    output logic        tx_rd_en, 
+    
+//=== Display ===
+    output logic [7:0]  DisplayValor, 
+    output logic        Displayiniciar, 
+    output logic        PulsoMitad, 
+    output logic        PulsoFin ); 
+  
+    import fsm_pkg::*; 
+    
+//=== Configurar estados ===  
+    estado_t estado_actual = S_IDLE,
+    estado_siguiente; estado_t origen_display; 
+   
+    always_ff @(posedge clk or posedge reset) begin 
+        if (reset) estado_actual <= S_IDLE; 
+        else estado_actual <= estado_siguiente; 
+    end 
+   
+    always_ff @(posedge clk or posedge reset) begin 
+        if (reset) origen_display <= S_IDLE; 
+        else if ((estado_siguiente == S_Display) && (estado_actual != S_Display)) 
+        origen_display <= estado_actual; 
+    end 
+    
+//=== Asegurar que tx_start funcione como pulso ===
+logic tx_start_p;
+logic tx_start_o;
+
+    always_ff @(posedge clk or posedge reset) begin
+        if (reset) begin
+            tx_start_o <= 1'b0;
+        end else begin
+            tx_start_o <= 1'b0;   // default 0 cada ciclo
+            if (tx_start_p) tx_start_o <= 1'b1;  // 1 ciclo // 1 ciclo
+        end
+    end
+
+assign tx_start = tx_start_o;
+
+//=== Asegurar tx_valid y rx_valid como pulsos===
+
+logic tx_valid_d; 
+           
+    always_ff @(posedge clk or posedge reset) begin 
+        if (reset) 
+            tx_valid_d <= 1'b0; 
+        else 
+            tx_valid_d <= tx_valid; 
+    end 
+           
+wire tx_valid_pulse = tx_valid & ~tx_valid_d; // latch del byte recibido 
+      
+logic rx_valid_d; 
+           
+    always_ff @(posedge clk or posedge reset) begin 
+        if (reset) 
+            rx_valid_d <= 1'b0; 
+        else 
+            rx_valid_d <= rx_valid; 
+    end 
+           
+wire rx_valid_pulse = rx_valid & ~rx_valid_d; // latch del byte recibido    
+
+logic single_tx;  // NUEVO
+
+// Lógica secuencial para armar single_tx al entrar por WR
+always_ff @(posedge clk or posedge reset) begin
+  if (reset) single_tx <= 1'b0;
+  else begin
+    // si venimos del hub por WR, armar modo unitario
+    if (estado_actual == S_EsperaBTN && estado_siguiente == S_WR)
+      single_tx <= 1'b1;
+    // al finalizar el byte enviado, limpiar
+    else if (estado_actual == S_TX_BUSY && !tx_busy && single_tx)
+      single_tx <= 1'b0;
+  end
+end
+
+// -------------------------------------------------------------------
+//INICIO FSM
+// -------------------------------------------------------------------  
+
+logic rd_one_sr1, rd_one_sr0;
+always_comb begin
+    estado_siguiente = estado_actual;
+    rx_rd_en   = 1'b0;
+    tx_rd_en   = 1'b0;
+    tx_start_p = 1'b0;
+
+  unique case (estado_actual)
+    S_IDLE:        estado_siguiente = S_EsperaBTN;
+    S_EsperaBTN: begin
+      if (enviar_en)       estado_siguiente = S_TX;     // ráfaga TX
+      else if (leer_en)    estado_siguiente = S_RX;     // ráfaga RX
+      else if (rd_en_one)  estado_siguiente = S_RD;     // MODO LECTURA
+      else if(wr_en)       estado_siguiente = S_WR;     //MODO ESCRITURA
+      else                 estado_siguiente = S_EsperaBTN;
+    end
+    
+    // ====== MODO ESCRITURA ======
+    S_WR: begin
+      // NO POP, NO TX_START, NO TX_PIPELINE AQUÍ
+      // Solo regresa al hub. (Si quieres, puedes mostrar en display last_wr_byte)
+      estado_siguiente = S_EsperaBTN;
+    end
+
+    // ====== MODO LECTURA ======
+    S_RD: begin
+      if (RXAV) begin
+        rx_rd_en = 1'b1;
+        estado_siguiente = S_WAIT_RD;
+      end else begin
+        estado_siguiente = S_EsperaBTN;
+      end
+    end
+    S_WAIT_RD:   if (rx_valid_pulse) estado_siguiente = S_LATCH_RD;
+    S_LATCH_RD:  estado_siguiente = S_Display;
+
+    // ====== RÁFAGA TX ======
+    S_TX: begin
+      if (tx_empty)          estado_siguiente = S_EsperaBTN;
+      else if (!tx_busy)     estado_siguiente = S_TX_POP;
+      else                   estado_siguiente = S_TX_BUSY;
+    end
+    S_TX_POP: begin
+      tx_rd_en = 1'b1;
+      estado_siguiente = S_TX_WAIT_DATA;
+    end
+    S_TX_WAIT_DATA: begin
+      if (tx_valid_pulse) estado_siguiente = S_TX_FIRE;
+    end
+    S_TX_FIRE: begin
+      if (tx_rdy && !tx_busy) begin  
+        tx_start_p = 1'b1;
+        estado_siguiente = S_TX_BUSY;
+      end else begin
+        estado_siguiente = S_TX_FIRE;
+      end
+    end
+     S_TX_BUSY: begin
+      if (!tx_busy)
+        estado_siguiente = single_tx ? S_EsperaBTN : S_TX; 
+    end
+
+    // ====== RÁFAGA RX ======
+    S_RX: begin
+      if (BytesRX != 0) begin
+        rx_rd_en = 1'b1;
+        estado_siguiente = S_WAIT_RX;
+      end else begin
+        estado_siguiente = S_IDLE;
+      end
+    end
+    S_WAIT_RX:   if (rx_valid_pulse) estado_siguiente = S_LATCH_RX;
+    S_LATCH_RX:  estado_siguiente = S_Display;
+    
+    S_RX_GAP: begin 
+    if (BytesRX != 0) estado_siguiente = S_RX;
+     else              estado_siguiente = S_EsperaBTN;
+    end  
+
+    // ====== DISPLAY ======
+    S_Display: begin
+        case (origen_display)
+          S_LATCH_RD: if (PulsoFin) begin 
+            estado_siguiente = S_EsperaBTN;   
+            end               // unitario read
+          S_LATCH_RX: if (PulsoFin) begin 
+                estado_siguiente = S_RX_GAP; // ráfaga rx continua
+          end
+          default:    estado_siguiente = S_EsperaBTN;
+        endcase
+      end
+    default: ;
+  endcase
+end
+                                                                        
+// ------------------------------------------------------------------- 
+//Contador de Display que se encarga de que cada valor se vea por 2 segundos 
+// ------------------------------------------------------------------- 
+    
+localparam int MAX_COUNT = Simulacion ? 20 : (CLK_HZ * 2); // usa CLK_HZ param 
+localparam int unsigned HALF = MAX_COUNT/2; 
+logic VentanaActiva; 
+logic[$clog2(MAX_COUNT)-1:0] DisplayContador; 
+    
+        always_ff @(posedge clk or posedge reset) begin 
+            if (reset) begin 
+                VentanaActiva <= 1'b0;
+                DisplayContador <= '0; 
+                PulsoMitad <= 1'b0; 
+                PulsoFin <= 1'b0; 
+            end else begin 
+                PulsoMitad <= 1'b0; 
+                PulsoFin<= 1'b0; 
+                if(Displayiniciar) begin //iniciar el display
+                    VentanaActiva <= 1'b1; //Iniciar el contador
+                    DisplayContador <= MAX_COUNT -1; 
+                end else 
+                if (VentanaActiva) begin 
+                    if(DisplayContador == 0) begin 
+                        PulsoFin <= 1'b1;
+                        VentanaActiva <= 1'b0; 
+                    end else begin 
+                        if (DisplayContador == HALF)
+                            PulsoMitad <= 1'b1; 
+                            DisplayContador <= DisplayContador - 1'b1; 
+                    end 
+                end 
+            end 
+        end 
+              
+// ------------------------------------------------------------------- 
+//Iniciar el Display para que muestre los valores correspondientes 
+// -------------------------------------------------------------------
+ wire displayFSM = (estado_actual == S_LATCH_RX) || (estado_actual == S_LATCH_RD); 
+ logic disp_arm;
+ logic [7:0] DisplayValor_reg; 
+ assign DisplayValor = DisplayValor_reg;
+ 
+always_ff @(posedge clk or posedge reset) begin
+  if (reset) begin
+    Displayiniciar   <= 1'b0;
+    DisplayValor_reg <= 8'h00;
+    disp_arm         <= 1'b0;
+  end else begin
+    Displayiniciar <= 1'b0;
+
+    if (estado_actual == S_LATCH_RX || estado_actual == S_LATCH_RD) begin
+      DisplayValor_reg <= rx_dout;
+      disp_arm <= 1'b1;
+    end else if (estado_actual == S_WR) begin
+      DisplayValor_reg <= last_wr_byte;  // mostrar el escrito
+      disp_arm <= 1'b1;
+    end else if (disp_arm) begin
+      Displayiniciar <= 1'b1;
+      disp_arm <= 1'b0;
+    end
+  end
+end
+ 
+// ------------------------------------------------------------------- 
+//LEDS
+// -------------------------------------------------------------------         
+assign LED[0] = (estado_actual == S_IDLE); 
+assign LED[1] = (estado_actual == S_EsperaBTN);
+assign LED[2] = (estado_actual == S_EsperaBTN1);
+assign LED[3] = (estado_actual == S_WR); 
+assign LED[4] = (estado_actual == S_TX);
+assign LED[5] = (estado_actual == S_TX_POP);  
+assign LED[6] = (estado_actual == S_TX_FIRE);
+assign LED[7] = wr_en;        // push TX
+assign LED[8] = enviar_en;    // ráfaga TX
+assign LED[9] = leer_en;      // ráfaga RX
+assign LED[10] = rd_en_one;    // lectura única
+assign LED[11] = BytesTX[8];
+assign LED[12] = RXAV; 
+assign LED[13] = (BytesTX != 0); 
+assign LED[14] = RXAV;      // RX tiene datos 
+assign LED[15] = ~tx_empty; // TX tiene datos 
+          
+endmodule
