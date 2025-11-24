@@ -1,0 +1,49 @@
+`timescale 1ns/1ps
+
+module ALU_Control (
+   input  logic [1:0] ALUOp,
+   input  logic [2:0] funct3,    // funct3 
+   input  logic [6:0] funct7,    // funct7 
+   output logic [3:0] Op     // Selector de operacion hacia la ALU
+);
+
+   // Codigos para la ALU
+   localparam [3:0]
+      ADD_CODE          = 4'b0000, // Suma
+      SUB_CODE          = 4'b0001, // Resta
+      OR_CODE           = 4'b0010, // OR
+      AND_CODE          = 4'b0011, // AND
+      SHIFT_LEFT        = 4'b0100, //SHIFT LEFT
+      SHIFT_RIGHT       = 4'b0101, //SHIFT RIGHT
+      SHIFT_ARITHMETIC  = 4'b0110, //SHIFT signed
+      XOR_CODE          = 4'b0111, //XOR
+      COMP_CODE         = 4'b1000, //compracion con signo
+      COMP_U_CODE       = 4'b1001; //comparacion sin signo
+
+   always_comb begin
+      case (ALUOp)
+         2'b00:  Op = ADD_CODE;
+         2'b01: begin
+            unique case(funct3) 
+                3'b000: Op = SUB_CODE;
+                3'b100, 3'b101: Op = COMP_CODE;            // BLT / BGE => signed
+          default: Op = SUB_CODE;
+            endcase
+         end
+         2'b10: begin                // Para tipo R (usar funct3/funct7)
+            unique case (funct3)
+               3'b000:  Op = (funct7 == 7'b0100000) ? SUB_CODE : ADD_CODE; // sub o add
+               3'b001:  Op = SHIFT_LEFT;
+               3'b010:  Op = COMP_CODE;
+               3'b011:  Op = COMP_U_CODE;
+               3'b100:  Op = XOR_CODE;
+               3'b101:  Op = (funct7 == 7'b0100000) ? SHIFT_ARITHMETIC: SHIFT_RIGHT;
+               3'b111:  Op = AND_CODE; // AND
+               3'b110:  Op = OR_CODE;  // OR
+               default: Op = ADD_CODE;
+            endcase
+         end
+         default:  Op = ADD_CODE;// Por defecto esta en suma.
+      endcase
+   end
+endmodule
