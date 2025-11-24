@@ -1,0 +1,38 @@
+`timescale 1ns/1ps
+module ALU#(parameter XLEN=64) (
+   input  logic [3:0] Op, // Selector de Operacion
+   input logic [XLEN-1:0] A, // Primer Operando
+   input logic [XLEN-1:0] B, // Segundo Operando
+   output logic [XLEN-1:0] ALUOut, // Salida de ALU
+   output logic Zero // Bandera de zero
+);
+   // Codigos para la ALU
+   localparam [3:0] 
+      ADD_CODE = 4'b0000, // Suma
+      SUB_CODE = 4'b0001, // Resta (Se puede utilizar como igualdad usando zero)
+      OR_CODE  = 4'b0010, // OR
+      AND_CODE = 4'b0011, // AND
+      SHIFT_LEFT = 4'b0100,
+      SHIFT_RIGHT = 4'b0101,
+      SHIFT_ARITHMETIC = 4'b0110,
+      XOR_CODE = 4'b0111,
+      COMP_CODE = 4'b1000,
+      COMP_U_CODE = 4'b1001;
+
+   always_comb begin
+      case (Op)
+         ADD_CODE:          ALUOut = A + B;
+         SUB_CODE:          ALUOut = A - B;
+         OR_CODE:           ALUOut = A | B; 
+         AND_CODE:          ALUOut = A & B;
+         SHIFT_LEFT:        ALUOut = A << B;
+         SHIFT_RIGHT:       ALUOut = A >> B;
+         SHIFT_ARITHMETIC:  ALUOut = $signed(A) >>> B;
+         XOR_CODE:          ALUOut = A ^ B; 
+         COMP_CODE:         ALUOut = ($signed(A) < $signed(B)) ? 64'd1 : 64'd0;
+         COMP_U_CODE:       ALUOut = (A < B) ? 64'd1 : 64'd0;
+         default: ALUOut = '0; 
+      endcase
+      Zero = (ALUOut == 64'd0);
+   end
+endmodule
