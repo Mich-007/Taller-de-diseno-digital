@@ -1,0 +1,43 @@
+`timescale 1ns / 1ps
+module immgen_rv64 #(
+  parameter int XLEN = 64
+)(
+  input  logic [31:0] instr_d,
+  input  logic [2:0]  ImmSel,   // 001: I, 010: S, 011: B, 100: U, 101: J
+  output logic [XLEN-1:0] imm
+);
+  // Campos
+  logic [6:0]  opcode = instr_d[6:0];
+  logic [2:0]  funct3 = instr_d[14:12];
+  logic [6:0]  funct7 = instr_d[31:25];
+
+  // Inmediatos de 32 bits
+  logic signed [31:0] imm_I, imm_S, imm_B, imm_U, imm_J;
+
+  // tipo-I: {31:20}
+  assign imm_I = {{20{instr_d[31]}}, instr_d[31:20]};
+
+  // tipo_S: {31:25, 11:7}
+  assign imm_S = {{20{instr_d[31]}}, instr_d[31:25], instr_d[11:7]};
+
+  // tipo_B: {31,7,30:25,11:8,0} << 1
+  assign imm_B = {{19{instr_d[31]}}, instr_d[31], instr_d[7], instr_d[30:25], instr_d[11:8], 1'b0};
+
+  // tipo_U: {31:12, 12 zeros}
+  assign imm_U = {instr_d[31:12], 12'b0};
+
+  // tipo_J: {31,19:12,20,30:21,0} << 1
+  assign imm_J = {{11{instr_d[31]}}, instr_d[31], instr_d[19:12], instr_d[20], instr_d[30:21], 1'b0};
+
+  always_comb begin
+    unique case (ImmSel)
+      3'b001: imm = {{(XLEN-32){imm_I[31]}}, imm_I};
+      3'b010: imm = {{(XLEN-32){imm_S[31]}}, imm_S};
+      3'b011: imm = {{(XLEN-32){imm_B[31]}}, imm_B};
+      3'b100: imm = {{(XLEN-32){imm_U[31]}}, imm_U};
+      3'b101: imm = {{(XLEN-32){imm_J[31]}}, imm_J};
+      default: imm = '0;
+    endcase
+  end
+endmodule
+
