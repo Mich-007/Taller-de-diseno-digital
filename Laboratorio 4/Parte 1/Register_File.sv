@@ -20,7 +20,7 @@ module register_file #(
     assign read_data2 = (rs2 == 0) ? '0 : regfile[rs2];
 
 // Escritura secuencial
-    always_ff @(posedge clk or posedge reset) begin
+    always_ff @(posedge clk) begin
         if (reset) begin
             integer i;
             for (i = 0; i < NUM_REGS; i++) begin
@@ -30,5 +30,4 @@ module register_file #(
             regfile[rd] <= write_data;
         end
     end
-
 endmodule
