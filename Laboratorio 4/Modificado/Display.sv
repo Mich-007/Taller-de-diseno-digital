@@ -6,8 +6,8 @@ module Display#(
 (   
 //=== Elementos de la FPGA ===  
     input logic          clk, reset,
-    output logic [6:0]   SEG,              //los 7 segmentos f�sicos del display
-    output logic [7:0]   AN,              // d�gitos activos en bajo
+    output logic [6:0]   SEG,              //los 7 segmentos fisicos del display
+    output logic [7:0]   AN,              // digitos activos en bajo
     
     input logic          SEG_we,
     input logic  [31:0]  SEG_wdata,
@@ -19,9 +19,9 @@ module Display#(
     ); 
 
                                                                            
-// ------------------------------------------------------------------- 
+// ________________________________________________________________________ 
 //Contador de Display que se encarga de que cada valor se vea por 2 segundos 
-// ------------------------------------------------------------------- 
+// 
     
 localparam int MAX_COUNT = Simulacion ? 20 : (CLK_HZ * 2); // usa CLK_HZ param 
 localparam int unsigned HALF = MAX_COUNT/2; 
@@ -54,9 +54,9 @@ logic[$clog2(MAX_COUNT)-1:0] DisplayContador;
             end 
         end 
               
-// ------------------------------------------------------------------- 
+// ________________________________________________________________________
 //Iniciar el Display para que muestre los valores correspondientes 
-// -------------------------------------------------------------------
+// 
 logic disp_arm;
  logic [7:0] DisplayValor_reg; 
  assign DisplayValor = DisplayValor_reg;
@@ -98,15 +98,15 @@ end
         AN  = 8'b1111_1111;  // off
         SEG = 7'b111_1111;
         unique case (fase)
-            F_D1: begin AN=8'b1111_1110; SEG=hex(dig1); end   // 1er d�gito
-            F_D2: begin AN=8'b1111_1101; SEG=hex(dig0); end // 2� d�gito
+            F_D1: begin AN=8'b1111_1110; SEG=hex(dig1); end   // 1 digito, primero
+            F_D2: begin AN=8'b1111_1101; SEG=hex(dig0); end // 2 digito, segundo
             default: ;
         endcase
     end
 
-// -------------------------------------------------------------------
+// ________________________________________________________________________
 //Decodificador de siete segmentos
-// -------------------------------------------------------------------  
+//   
     function automatic logic [6:0] hex (input logic [3:0] nibble);
         case (nibble)
             4'h0: hex = 7'b1000000;
