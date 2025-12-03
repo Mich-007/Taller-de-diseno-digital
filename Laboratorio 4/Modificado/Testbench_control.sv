@@ -1,11 +1,11 @@
 `timescale 1ns/1ps
 
-// TESTBENCH para TOP con Sensor + Timer + Display (versión corregida y lista)
+// TESTBENCH para TOP con Sensor + Timer + Display 
 module tb_top;
 
-  // ------------------------
+  // ________________________________________________________________________
   // Señales hacia el DUT
-  // ------------------------
+  // 
   logic        clk;
   logic        reset;
   logic [15:0] SW;
@@ -15,9 +15,9 @@ module tb_top;
   wire [15:0]  LED;
   wire [3:0]   st_dbg;
 
-  // ------------------------
+  // ________________________________________________________________________
   // Instancia del DUT (Top)
-  // ------------------------
+  // 
   Top #(.Simulacion(1)) DUT (
       .clk_100 (clk),
       .reset   (reset),
@@ -28,15 +28,15 @@ module tb_top;
       .st_dbg  (st_dbg)
   );
 
-  // ------------------------
+  // ________________________________________________________________________
   // Clock (100 MHz en Sim)
-  // ------------------------
+  // 
   initial clk = 1'b0;
   always #5 clk = ~clk;   // 10 ns -> 100 MHz
 
-  // ------------------------
+  // ________________________________________________________________________
   // Reloj interno (fallback)
-  // ------------------------
+  // 
   wire clk10;
   assign clk10 = (DUT.clk_10MHz === 1'bx) ? clk : DUT.clk_10MHz;
 
@@ -44,9 +44,9 @@ module tb_top;
     repeat(n) @(posedge clk10);
   endtask
 
-  // ------------------------
+  // ________________________________________________________________________
   // Señales jerárquicas (seguras con condicionales)
-  // ------------------------
+  // 
   // Intentamos leer señales internas si existen; si no, usamos valores por defecto.
   function automatic logic exists_signal(input string path);
     // No hay forma portable de comprobar existencia en todos los simuladores desde SV,
@@ -55,13 +55,13 @@ module tb_top;
     exists_signal = 1'b1;
   endfunction
 
-  // Rutas jerárquicas (pueden variar según tu Top)
-  // Intentamos mapear PC e IR si existen en la jerarquía
+  // Rutas jerárquicas 
+  // mapear PC e IR si existen en la jerarquía
   logic [31:0] PC_hier;
   logic [31:0] IR_hier;
   // Protegemos con generate-like conditional: si la jerarquía existe, conectamos; si no, dejamos 0.
-  // Muchos simuladores permiten referencias jerárquicas; si fallan, comenta estas líneas.
-  // Ajusta las rutas si tus señales internas tienen nombres distintos.
+  
+  
   // Ejemplo de rutas esperadas: DUT.DP.PC, DUT.DP.IR, DUT.ProgIn_i
   // Si no existen, no es crítico: el TB seguirá mostrando periféricos y salidas top-level.
 
@@ -71,9 +71,9 @@ module tb_top;
   assign PC_hier = ( $test$plusargs("use_hier") ) ? DUT.DP.PC : 32'h0;
   assign IR_hier = ( $test$plusargs("use_hier") ) ? DUT.DP.IR : DUT.ProgIn_i;
 
-  // ------------------------
+  // ________________________________________________________________________
   // Periféricos (extraer flags de 32-bit) - rutas seguras
-  // ------------------------
+  // 
   wire SEG_we = ( $isunknown(DUT.SEG_we) ) ? 1'b0 : DUT.SEG_we;
   wire [31:0] SEG_wdata = ( $isunknown(DUT.SEG_wdata) ) ? 32'h0 : DUT.SEG_wdata;
 
@@ -85,9 +85,9 @@ module tb_top;
   wire TIMER_done = ( $isunknown(DUT.TIMER_done_rdata) ) ? 1'b0 : DUT.TIMER_done_rdata[0];
   wire [31:0] TIMER_value = ( $isunknown(DUT.TIMER_ctrl_wdata) ) ? 32'h0 : DUT.TIMER_ctrl_wdata;
 
-  // ------------------------
+  // ________________________________________________________________________
   // Monitores
-  // ------------------------
+  // 
   logic [31:0] last_PC;
   logic last_TEMP_done, last_TIMER_done;
   logic [15:0] last_LED;
@@ -138,9 +138,9 @@ module tb_top;
     end
   end
 
-  // ------------------------
+  // ________________________________________________________________________
   // Estímulos
-  // ------------------------
+  // 
   initial begin
     SW    = '0;
     reset = 1'b1;
@@ -158,15 +158,15 @@ module tb_top;
 
     wait_clk(20);
 
-    // --------------------------------
+    // ________________________________________________________________________
     // Prueba: dejar correr para observar fetch/IR y ejecución de las primeras instrucciones
-    // --------------------------------
+    // 
     $display("\n--- Ejecutando programa en ROM (program.hex) ---");
     wait_clk(200); // ajusta según necesites
 
-    // --------------------------------
+    // ________________________________________________________________________
     // Fin
-    // --------------------------------
+    // 
     $display("\n================================");
     $display("   FIN DE SIMULACIÓN");
     $display("================================");
