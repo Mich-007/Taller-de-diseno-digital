@@ -4,7 +4,7 @@ module Perifericos#(
     )(
     input  logic        clk, reset,
     //=== SW === 
-    input  logic [1:0]  sw0_db,     // switches despu�s de antirrebote
+    input  logic [1:0]  sw0_db,     // switches despues de antirrebote
     input  logic [1:0]  sw1_db,
     input  logic [1:0]  sw2_db,
     input  logic [1:0]  sw3_db,
