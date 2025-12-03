@@ -9,7 +9,7 @@ module ALU #(
     output logic            Zero
 );
 
-    // Op encoding (sugerido)
+    // Op encoding 
     // 4'b0000 ADD
     // 4'b0001 SUB
     // 4'b0010 AND
