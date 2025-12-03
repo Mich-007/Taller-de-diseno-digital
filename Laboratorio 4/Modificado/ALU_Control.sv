@@ -6,7 +6,7 @@ module ALU_Control (
     output logic [3:0] Op        // hacia ALU (ver codificación en ALU)
 );
 
-    // Mapear instrucciones RV32I a Op
+    // En esta parte se mapea instrucciones RV32I a Op
     // ALUOp conventions:
     // 00 -> load/store/addi (use ADD)
     // 01 -> branch (use SUB)
