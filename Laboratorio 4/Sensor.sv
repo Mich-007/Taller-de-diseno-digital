@@ -1,40 +1,229 @@
-module TempSensor #( 
-    parameter bit Simulacion = 0
-    )(
-    input  logic        clk, reset,
+`timescale 1ns / 1ps
 
+module TempSensor #(
+    parameter int CLK_FREQ = 10_000_000   // tu clk real
+)(
+
+    input  logic        clk,
+    input  logic        reset,
+
+    // Desde la CPU
     input  logic        TEMP_ctrl_we,
     input  logic [31:0] TEMP_ctrl_wdata,
 
     output logic [31:0] TEMP_data_rdata,
-    output logic [31:0] TEMP_done_rdata,
+    output logic        TEMP_done_rdata,
 
-    input  logic [15:0] XADC_data,
-    input  logic        XADC_ready
+    // I2C físico
+    inout  tri          sda,
+    inout  tri          scl
 );
 
-    logic activo;
+    //------------------------------------------------------
+    // CONSTANTES
+    //------------------------------------------------------
+    localparam logic [6:0] ADT_ADDR = 7'h4B;
+    localparam logic [7:0] TEMP_PTR = 8'h00;   // registro MSB
 
-    always_ff @(posedge clk or posedge reset) begin
-        if (reset) begin
-            activo          <= 0;
-            TEMP_done_rdata <= 0;
-            TEMP_data_rdata <= 0;
-        end
-        else begin
-            // inicia lectura
-            if (TEMP_ctrl_we) begin
-                activo          <= 1;
-                TEMP_done_rdata <= 0;
-            end
+    //------------------------------------------------------
+    // Control de start desde CPU
+    //------------------------------------------------------
+logic start_pulse;
 
-            // cuando XADC da dato
-            if (activo && XADC_ready) begin
-                TEMP_data_rdata <= {16'b0, XADC_data};
-                TEMP_done_rdata <= 1;
-                activo <= 0;
-            end
-        end
+always_ff @(posedge clk or posedge reset)
+begin
+    if(reset)
+        start_pulse <= 1'b0;
+    else
+        start_pulse <= TEMP_ctrl_we && TEMP_ctrl_wdata[0];
+end
+
+    //------------------------------------------------------
+    // Señales al IP I2C
+    //------------------------------------------------------
+    logic        i2c_ena;
+    logic        i2c_rw;
+    logic [7:0]  i2c_data_wr;
+
+    logic        i2c_busy;
+    logic        i2c_ack_err;
+    logic [7:0]  i2c_data_rd;
+
+    //------------------------------------------------------
+    // IP I2C MASTER
+    //------------------------------------------------------
+    i2c_master #(
+        .input_clk (CLK_FREQ),
+        .bus_clk   (400_000)
+    ) I2C (
+
+        .clk       (clk),
+        .reset_n   (~reset),
+
+        .ena       (i2c_ena),
+        .addr      (ADT_ADDR),
+        .rw        (i2c_rw),
+        .data_wr   (i2c_data_wr),
+
+        .busy      (i2c_busy),
+        .data_rd   (i2c_data_rd),
+        .ack_error (i2c_ack_err),
+
+        .sda       (sda),
+        .scl       (scl)
+    );
+
+    //------------------------------------------------------
+    // FSM DEL SENSOR
+    //------------------------------------------------------
+    typedef enum logic [2:0] {
+        S_IDLE,
+        S_PTR_WRITE,
+        S_WAIT_WR,
+        S_MSB_READ,
+        S_WAIT_MSB,
+        S_LSB_READ,
+        S_WAIT_LSB,
+        S_DONE
+    } state_t;
+
+    state_t st;
+
+    logic [7:0] msb;
+    logic [7:0] lsb;
+    logic wait_busy;
+    //------------------------------------------------------
+    // FSM principal
+    //------------------------------------------------------
+//------------------------------------------------------
+// FSM principal CORREGIDA
+//------------------------------------------------------
+always_ff @(posedge clk or posedge reset)
+begin
+    if(reset) begin
+        st <= S_IDLE;
+
+        i2c_ena      <= 0;
+        i2c_rw       <= 0;
+        i2c_data_wr <= 0;
+
+        msb <= 0;
+        lsb <= 0;
+
+        TEMP_done_rdata <= 0;
+        TEMP_data_rdata <= 0;
+
+        wait_busy <= 0;
     end
-                
+    else begin
+
+        TEMP_done_rdata <= 0;
+
+        case(st)
+
+        //------------------------------------------
+        // IDLE
+        //------------------------------------------
+        S_IDLE:
+        begin
+            i2c_ena <= 0;
+
+            if(start_pulse) begin
+                i2c_rw       <= 0;          // WRITE
+                i2c_data_wr <= TEMP_PTR;
+                i2c_ena     <= 1;          // ENA se queda activo
+                st          <= S_PTR_WRITE;
+            end
+        end
+
+        //------------------------------------------
+        // ENA WRITE PTR ? ESPERA busy=1
+        //------------------------------------------
+        S_PTR_WRITE:
+        begin
+            i2c_ena <= 1;
+
+            if(i2c_busy) begin
+                i2c_ena <= 0;              // core capturó comando
+                st      <= S_WAIT_WR;
+            end
+        end
+
+        //------------------------------------------
+        // ESPERA FIN WRITE (busy ? 0)
+        //------------------------------------------
+        S_WAIT_WR:
+        begin
+            if(!i2c_busy)
+                st <= S_MSB_READ;
+        end
+
+        //------------------------------------------
+        // START LECTURA MSB
+        //------------------------------------------
+        S_MSB_READ:
+        begin
+            i2c_rw   <= 1;                // READ
+            i2c_ena <= 1;
+
+            if(i2c_busy) begin
+                i2c_ena <= 0;
+                st <= S_WAIT_MSB;
+            end
+        end
+
+        //------------------------------------------
+        // ESPERAR FIN MSB
+        //------------------------------------------
+        S_WAIT_MSB:
+        begin
+            if(!i2c_busy) begin
+                msb <= i2c_data_rd;
+                st  <= S_LSB_READ;
+            end
+        end
+
+        //------------------------------------------
+        // START LECTURA LSB
+        //------------------------------------------
+        S_LSB_READ:
+        begin
+            i2c_rw   <= 1;
+            i2c_ena <= 1;
+
+            if(i2c_busy) begin
+                i2c_ena <= 0;
+                st <= S_WAIT_LSB;
+            end
+        end
+
+        //------------------------------------------
+        // ESPERAR FIN LSB
+        //------------------------------------------
+        S_WAIT_LSB:
+        begin
+            if(!i2c_busy) begin
+                lsb <= i2c_data_rd;
+                st  <= S_DONE;
+            end
+        end
+
+        //------------------------------------------
+        // DONE
+        //------------------------------------------
+        S_DONE:
+        begin
+            TEMP_data_rdata <= {16'b0, msb, lsb};
+            TEMP_done_rdata <= 1'b1;
+            st <= S_IDLE;
+        end
+
+        //------------------------------------------
+        default:
+            st <= S_IDLE;
+
+        endcase
+    end
+end
+
 endmodule
