@@ -6,7 +6,7 @@
 module tb_top;
 
   // ------------------------
-  // Señales hacia el DUT
+  // SeÃ±ales hacia el DUT
   // ------------------------
   logic        clk;
   logic        reset;
@@ -38,7 +38,7 @@ module tb_top;
 
   // ------------------------
   // Acceso al reloj interno
-  // (en Simulación = clk)
+  // (en SimulaciÃ³n = clk)
   // ------------------------
   wire clk10 = DUT.clk_10MHz;
 
@@ -47,14 +47,14 @@ module tb_top;
   endtask
 
   // ------------------------
-  // Pinchar señales internas
+  // Pinchar seÃ±ales internas
   // ------------------------
 
   // CPU
   wire [31:0] PC   = DUT.DP.PC;
   wire [31:0] INST = DUT.ProgIn_i;
 
-  // Periféricos
+  // PerifÃ©ricos
   wire SEG_we              = DUT.SEG_we;
   wire [31:0] SEG_wdata   = DUT.SEG_wdata;
 
@@ -116,7 +116,7 @@ module tb_top;
 
 
   // ------------------------
-  // Estímulos
+  // EstÃ­mulos
   // ------------------------
   initial begin
 
@@ -127,7 +127,7 @@ module tb_top;
     reset = 1'b0;
 
     $display("================================");
-    $display("   SIMULACIÓN INICIADA");
+    $display("   SIMULACIÃ“N INICIADA");
     $display("================================");
 
     wait_clk(20);
@@ -159,7 +159,7 @@ module tb_top;
     // Fin
     // --------------------------------
     $display("\n================================");
-    $display("   FIN DE SIMULACIÓN");
+    $display("   FIN DE SIMULACIÃ“N");
     $display("================================");
 
     $stop;
