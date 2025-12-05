@@ -84,7 +84,7 @@ Este IP permite instanciar memorias utilizando los recursos dedicados de Block R
     * ROM de Programa: Se configura como memoria de solo lectura (ROM) y se inicializa con un archivo .mem (contiene el programa RISC-V compilado). Mapeada típicamente desde 0x0000.
     * RAM de Datos: Se configura como memoria de lectura/escritura de uno o dos puertos para almacenar datos temporales de la aplicación y la pila. Mapeada típicamente desde 0x1000.
 
-b) ADC para Entradas Analógicas (XADC)
+    b) ADC para Entradas Analógicas (XADC)
 
 El XADC es un IP que proporciona acceso a un convertidor analógico-digital (ADC) interno y dedicado que poseen muchas FPGAs de AMD/Xilinx.
    * En el laboratorio, el módulo del sensor de temperatura (TMP) debe utilizar el XADC para digitalizar la señal analógica del sensor externo (ej. TMP36).
