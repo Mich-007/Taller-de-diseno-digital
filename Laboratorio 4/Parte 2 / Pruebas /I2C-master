@@ -1,0 +1,236 @@
+`timescale 1ns / 1ps
+
+module i2c_master #(
+    parameter int input_clk = 10_000_000,  // Cambiado a minúsculas
+    parameter int bus_clk   = 400_000      // Cambiado a minúsculas
+)(
+    input  logic        clk,
+    input  logic        reset_n,
+    
+    input  logic        ena,
+    input  logic [6:0]  addr,
+    input  logic        rw,
+    input  logic [7:0]  data_wr,
+    
+    output logic        busy,
+    output logic [7:0]  data_rd,
+    output logic        ack_error,
+    
+    inout  wire         sda,
+    inout  wire         scl
+);
+
+    // ========== MODULO SIMPLIFICADO PARA SIMULACIÓN ==========
+    // Este es un modelo funcional de I2C master para simulación
+    
+    logic sda_out = 1'b1;
+    logic scl_out = 1'b1;
+    logic sda_oe = 1'b0;
+    logic scl_oe = 1'b0;
+    
+    assign sda = sda_oe ? sda_out : 1'bz;
+    assign scl = scl_oe ? scl_out : 1'bz;
+    
+    // Estados
+    typedef enum logic [2:0] {
+        ST_IDLE,
+        ST_START,
+        ST_ADDR,
+        ST_ACK1,
+        ST_DATA_WR,
+        ST_DATA_RD,
+        ST_ACK2,
+        ST_STOP
+    } state_t;
+    
+    state_t state = ST_IDLE;
+    logic [7:0] shift_reg;
+    logic [3:0] bit_count;
+    logic [23:0] delay_counter;
+    
+    // Memoria simulada del esclavo (para pruebas)
+    logic [7:0] slave_memory [0:1] = '{8'h12, 8'h34}; // MSB, LSB
+    
+    always_ff @(posedge clk or negedge reset_n) begin
+        if (!reset_n) begin
+            state <= ST_IDLE;
+            busy <= 0;
+            sda_oe <= 0;
+            scl_oe <= 0;
+            sda_out <= 1;
+            scl_out <= 1;
+            data_rd <= 0;
+            ack_error <= 0;
+            bit_count <= 0;
+            delay_counter <= 0;
+        end
+        else begin
+            // Contador de retardo simple
+            if (state != ST_IDLE) begin
+                delay_counter <= delay_counter + 1;
+            end else begin
+                delay_counter <= 0;
+            end
+            
+            case (state)
+                ST_IDLE: begin
+                    busy <= 0;
+                    sda_oe <= 0;
+                    scl_oe <= 0;
+                    if (ena && !busy) begin
+                        busy <= 1;
+                        state <= ST_START;
+                        shift_reg <= {addr, rw};
+                        bit_count <= 0;
+                        ack_error <= 0;
+                        delay_counter <= 0;
+                        $display("[I2C Master] Starting transaction, rw=%b", rw);
+                    end
+                end
+                
+                ST_START: begin
+                    sda_oe <= 1;
+                    scl_oe <= 0;
+                    sda_out <= 0; // Start condition
+                    if (delay_counter > 10) begin
+                        state <= ST_ADDR;
+                        delay_counter <= 0;
+                    end
+                end
+                
+                ST_ADDR: begin
+                    scl_oe <= 1;
+                    scl_out <= (delay_counter < 10) ? 0 : 1; // Generar clock
+                    
+                    if (delay_counter == 5) begin
+                        sda_out <= shift_reg[7];
+                    end
+                    else if (delay_counter == 15) begin
+                        if (bit_count == 7) begin
+                            state <= ST_ACK1;
+                            bit_count <= 0;
+                        end else begin
+                            shift_reg <= {shift_reg[6:0], 1'b0};
+                            bit_count <= bit_count + 1;
+                        end
+                        delay_counter <= 0;
+                    end
+                end
+                
+                ST_ACK1: begin
+                    scl_oe <= 1;
+                    sda_oe <= 0; // Liberar SDA para ACK
+                    scl_out <= (delay_counter < 10) ? 0 : 1;
+                    
+                    if (delay_counter == 15) begin
+                        // Verificar ACK
+                        if (sda == 0) begin
+                            ack_error <= 0;
+                            if (rw == 0) begin // Write
+                                state <= ST_DATA_WR;
+                                shift_reg <= data_wr;
+                                bit_count <= 0;
+                            end else begin // Read
+                                state <= ST_DATA_RD;
+                                shift_reg <= slave_memory[0]; // Primer byte
+                                bit_count <= 0;
+                            end
+                        end else begin
+                            ack_error <= 1;
+                            state <= ST_STOP;
+                        end
+                        delay_counter <= 0;
+                    end
+                end
+                
+                ST_DATA_WR: begin
+                    scl_oe <= 1;
+                    sda_oe <= 1;
+                    scl_out <= (delay_counter < 10) ? 0 : 1;
+                    
+                    if (delay_counter == 5) begin
+                        sda_out <= shift_reg[7];
+                    end
+                    else if (delay_counter == 15) begin
+                        if (bit_count == 7) begin
+                            state <= ST_ACK2;
+                            bit_count <= 0;
+                        end else begin
+                            shift_reg <= {shift_reg[6:0], 1'b0};
+                            bit_count <= bit_count + 1;
+                        end
+                        delay_counter <= 0;
+                    end
+                end
+                
+                ST_DATA_RD: begin
+                    scl_oe <= 1;
+                    sda_oe <= 0; // Escucha SDA
+                    scl_out <= (delay_counter < 10) ? 0 : 1;
+                    
+                    if (delay_counter == 10) begin // Muestrear en medio del pulso alto
+                        shift_reg <= {shift_reg[6:0], sda};
+                        if (bit_count == 7) begin
+                            data_rd <= {shift_reg[6:0], sda};
+                            $display("[I2C Master] Read data: 0x%h", {shift_reg[6:0], sda});
+                            state <= ST_ACK2;
+                            bit_count <= 0;
+                        end else begin
+                            bit_count <= bit_count + 1;
+                        end
+                    end
+                    else if (delay_counter == 15) begin
+                        delay_counter <= 0;
+                    end
+                end
+                
+                ST_ACK2: begin
+                    scl_oe <= 1;
+                    
+                    if (rw == 0) begin // Write
+                        sda_oe <= 0; // Liberar para ACK
+                        scl_out <= (delay_counter < 10) ? 0 : 1;
+                        
+                        if (delay_counter == 15) begin
+                            // Verificar ACK del esclavo
+                            ack_error <= (sda == 1);
+                            state <= ST_STOP;
+                            delay_counter <= 0;
+                        end
+                    end else begin // Read
+                        sda_oe <= 1;
+                        sda_out <= 1; // Enviar NACK para terminar lectura
+                        scl_out <= (delay_counter < 10) ? 0 : 1;
+                        
+                        if (delay_counter == 15) begin
+                            state <= ST_STOP;
+                            delay_counter <= 0;
+                        end
+                    end
+                end
+                
+                ST_STOP: begin
+                    scl_oe <= 0;
+                    sda_oe <= 1;
+                    
+                    if (delay_counter == 0) begin
+                        sda_out <= 0;
+                    end
+                    else if (delay_counter == 5) begin
+                        scl_out <= 1;
+                    end
+                    else if (delay_counter == 10) begin
+                        sda_out <= 1; // Stop condition
+                    end
+                    else if (delay_counter == 20) begin
+                        state <= ST_IDLE;
+                        $display("[I2C Master] Transaction completed");
+                    end
+                end
+                
+                default: state <= ST_IDLE;
+            endcase
+        end
+    end
+
+endmodule
