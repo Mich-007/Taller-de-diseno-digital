@@ -1,231 +1,102 @@
-`timescale 1ns / 1ps
-
-module TempSensor #(
-    parameter int CLK_FREQ = 10_000_000   // tu clk real
-)(
-
-    input  logic        clk,
-    input  logic        reset,
-
-    // Desde la CPU
-    input  logic        TEMP_ctrl_we,
-    input  logic [31:0] TEMP_ctrl_wdata,
-
-    output logic [31:0] TEMP_data_rdata,
-    output logic        TEMP_done_rdata,
-
-    // I2C físico
-    inout  tri          sda,
-    inout  tri          scl
+module sensor_temp(
+    input  wire clk,
+    input  wire rst,
+    output reg scl,
+    inout  wire sda,
+    output reg [15:0] temperature_data
 );
 
-    //------------------------------------------------------
-    // CONSTANTES
-    //------------------------------------------------------
-    localparam logic [6:0] ADT_ADDR = 7'h4B;
-    localparam logic [7:0] TEMP_PTR = 8'h00;   // registro MSB
+    // Clock divider para SCL (100 kHz)
+    reg [15:0] div_cnt = 0;
+    reg scl_clk = 1;
 
-    //------------------------------------------------------
-    // Control de start desde CPU
-    //------------------------------------------------------
-    logic start_pulse;
-
-    always_ff @(posedge clk or posedge reset)
-    begin
-        if(reset)
-            start_pulse <= 1'b0;
-        else
-            start_pulse <= TEMP_ctrl_we && TEMP_ctrl_wdata[0];
+    always @(posedge clk) begin
+        if (rst) begin
+            div_cnt <= 0;
+            scl_clk <= 1;
+        end else begin
+            if (div_cnt == 500) begin
+                div_cnt <= 0;
+                scl_clk <= ~scl_clk;
+            end else begin
+                div_cnt <= div_cnt + 1;
+            end
+        end
     end
 
-    //------------------------------------------------------
-    // Señales al IP I2C
-    //------------------------------------------------------
-    logic        i2c_ena;
-    logic        i2c_rw;
-    logic [7:0]  i2c_data_wr;
+    assign scl = scl_clk;
 
-    logic        i2c_busy;
-    logic        i2c_ack_err;
-    logic [7:0]  i2c_data_rd;
+    //------------------------------------------------------------
+    // I2C Master simple
+    //------------------------------------------------------------
+    reg sda_out = 1;
+    reg sda_dir = 0;    // 1 = master controla SDA, 0 = línea del slave
+    assign sda = (sda_dir) ? sda_out : 1'bz;
 
-    //------------------------------------------------------
-    // IP I2C MASTER
-    //------------------------------------------------------
-    i2c_master #(
-        .input_clk (CLK_FREQ),
-        .bus_clk   (400_000)
-    ) I2C (
+    localparam SLAVE_ADDR = 7'h4B;
 
-        .clk       (clk),
-        .reset_n   (~reset),
+    reg [7:0] bit_cnt = 0;
+    reg [15:0] temp_shift = 16'h0000;
+    reg [3:0] state = 0;
 
-        .ena       (i2c_ena),
-        .addr      (ADT_ADDR),
-        .rw        (i2c_rw),
-        .data_wr   (i2c_data_wr),
+    always @(posedge scl_clk or posedge rst) begin
+        if (rst) begin
+            state <= 0;
+            sda_dir <= 1;
+            sda_out <= 1;
+            bit_cnt <= 0;
+            temperature_data <= 0;
+        end else begin
+            case(state)
 
-        .busy      (i2c_busy),
-        .data_rd   (i2c_data_rd),
-        .ack_error (i2c_ack_err),
-
-        .sda       (sda),
-        .scl       (scl)
-    );
-
-    //------------------------------------------------------
-    // FSM DEL SENSOR
-    //------------------------------------------------------
-    typedef enum logic [3:0] {  // Cambiado de [2:0] a [3:0]
-        S_IDLE,
-        S_PTR_WRITE,
-        S_WAIT_WR,
-        S_MSB_READ,
-        S_WAIT_MSB,
-        S_LSB_READ,
-        S_WAIT_LSB,
-        S_DONE,
-        S_ERROR
-    } state_t;
-
-    state_t st;
-
-    logic [7:0] msb;
-    logic [7:0] lsb;
-    
-    //------------------------------------------------------
-    // FSM principal
-    //------------------------------------------------------
-    always_ff @(posedge clk or posedge reset)
-    begin
-        if(reset) begin
-            st <= S_IDLE;
-
-            i2c_ena      <= 0;
-            i2c_rw       <= 0;
-            i2c_data_wr <= 0;
-
-            msb <= 0;
-            lsb <= 0;
-
-            TEMP_done_rdata <= 0;
-            TEMP_data_rdata <= 0;
-        end
-        else begin
-
-            TEMP_done_rdata <= 0;
-
-            case(st)
-
-            //------------------------------------------
-            // IDLE
-            //------------------------------------------
-            S_IDLE:
-            begin
-                i2c_ena <= 0;
-
-                if(start_pulse) begin
-                    i2c_rw       <= 0;          // WRITE
-                    i2c_data_wr <= TEMP_PTR;
-                    i2c_ena     <= 1;          // ENA se queda activo
-                    st          <= S_PTR_WRITE;
+                // START CONDITION
+                0: begin
+                    sda_dir <= 1;
+                    sda_out <= 1;
+                    state <= 1;
                 end
-            end
 
-            //------------------------------------------
-            // ENA WRITE PTR ? ESPERA busy=1
-            //------------------------------------------
-            S_PTR_WRITE:
-            begin
-                i2c_ena <= 1;
-
-                if(i2c_busy) begin
-                    i2c_ena <= 0;              // core capturó comando
-                    st      <= S_WAIT_WR;
+                1: begin
+                    sda_out <= 0; // START
+                    bit_cnt <= 7;
+                    state <= 2;
                 end
-            end
 
-            //------------------------------------------
-            // ESPERA FIN WRITE (busy ? 0)
-            //------------------------------------------
-            S_WAIT_WR:
-            begin
-                if(!i2c_busy)
-                    st <= S_MSB_READ;
-            end
-
-            //------------------------------------------
-            // START LECTURA MSB
-            //------------------------------------------
-            S_MSB_READ:
-            begin
-                i2c_rw   <= 1;                // READ
-                i2c_ena <= 1;
-
-                if(i2c_busy) begin
-                    i2c_ena <= 0;
-                    st <= S_WAIT_MSB;
+                // Enviar dirección + bit de lectura
+                2: begin
+                    sda_out <= SLAVE_ADDR[bit_cnt];
+                    if (bit_cnt == 0) state <= 3;
+                    else bit_cnt <= bit_cnt - 1;
                 end
-            end
 
-            //------------------------------------------
-            // ESPERAR FIN MSB
-            //------------------------------------------
-            S_WAIT_MSB:
-            begin
-                if(!i2c_busy) begin
-                    msb <= i2c_data_rd;
-                    st  <= S_LSB_READ;
+                // Bit de lectura (1)
+                3: begin
+                    sda_out <= 1;
+                    state <= 4;
                 end
-            end
 
-            //------------------------------------------
-            // START LECTURA LSB
-            //------------------------------------------
-            S_LSB_READ:
-            begin
-                i2c_rw   <= 1;
-                i2c_ena <= 1;
-
-                if(i2c_busy) begin
-                    i2c_ena <= 0;
-                    st <= S_WAIT_LSB;
+                // ACK del slave
+                4: begin
+                    sda_dir <= 0; // Slave controla SDA
+                    state <= 5;
                 end
-            end
 
-            //------------------------------------------
-            // ESPERAR FIN LSB
-            //------------------------------------------
-            S_WAIT_LSB:
-            begin
-                if(!i2c_busy) begin
-                    lsb <= i2c_data_rd;
-                    st  <= S_DONE;
+                // Leer 16 bits
+                5: begin
+                    temp_shift <= {temp_shift[14:0], sda};
+                    bit_cnt <= bit_cnt + 1;
+
+                    if (bit_cnt == 15) begin
+                        state <= 6;
+                        sda_dir <= 1;
+                    end
                 end
-            end
 
-            //------------------------------------------
-            // DONE
-            //------------------------------------------
-            S_DONE:
-            begin
-                TEMP_data_rdata <= {16'b0, msb, lsb};
-                TEMP_done_rdata <= 1'b1;
-                st <= S_IDLE;
-            end
-
-            //------------------------------------------
-            // ERROR (nuevo estado)
-            //------------------------------------------
-            S_ERROR:
-            begin
-                // Manejo de error - puedes agregar lógica aquí
-                st <= S_IDLE;
-            end
-
-            //------------------------------------------
-            default:
-                st <= S_IDLE;
+                6: begin
+                    sda_out <= 1; // STOP
+                    temperature_data <= temp_shift;
+                    state <= 0;   // Repetir
+                end
 
             endcase
         end
