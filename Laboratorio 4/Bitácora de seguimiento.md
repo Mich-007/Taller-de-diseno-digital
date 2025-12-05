@@ -19,7 +19,7 @@ IE-0523 — Arquitectura de Computadores
 Luis Carlos Rosales 
 
 ## **Fecha de Entrega:**  
-04/12/2025
+05/12/2025
 
 ---
 
