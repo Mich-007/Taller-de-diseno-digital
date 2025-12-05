@@ -1,149 +1,41 @@
-`timescale 1ns / 1ps
+`timescale 1ns/1ps
 
-module tb_TempSensor();
-    // Parámetros
-    parameter CLK_FREQ = 10_000_000;
-    parameter CLK_PERIOD = 100; // 10MHz -> 100ns period
-    
-    // Señales del DUT
-    logic clk;
-    logic reset;
-    logic TEMP_ctrl_we;
-    logic [31:0] TEMP_ctrl_wdata;
-    logic [31:0] TEMP_data_rdata;
-    logic TEMP_done_rdata;
-    wire sda;
+module tb_sensor_temp();
+
+    reg clk = 0;
+    reg rst = 1;
+
     wire scl;
-    
-    // Generador de reloj
-    always #(CLK_PERIOD/2) clk = ~clk;
-    
-    // Instancia del DUT
-    TempSensor #(
-        .CLK_FREQ(CLK_FREQ)
-    ) dut (
+    wire sda;
+    wire [15:0] temp_data;
+
+    // DUT Maestro I2C
+    sensor_temp dut (
         .clk(clk),
-        .reset(reset),
-        .TEMP_ctrl_we(TEMP_ctrl_we),
-        .TEMP_ctrl_wdata(TEMP_ctrl_wdata),
-        .TEMP_data_rdata(TEMP_data_rdata),
-        .TEMP_done_rdata(TEMP_done_rdata),
+        .rst(rst),
+        .scl(scl),
         .sda(sda),
-        .scl(scl)
+        .temperature_data(temp_data)
     );
-    
-    // Test principal
+
+    // Sensor RANDOM
+    i2c_master (
+        .scl(scl),
+        .sda(sda)
+    );
+
+    // Clock 100 MHz
+    always #5 clk = ~clk;
+
     initial begin
-        // Inicialización
-        clk = 0;
-        reset = 1;
-        TEMP_ctrl_we = 0;
-        TEMP_ctrl_wdata = 0;
-        
-        // Mensaje de inicio
-        $display("====================================");
-        $display("Iniciando simulación del TempSensor");
-        $display("====================================");
-        
-        // 1. Reset
-        #100;
-        reset = 0;
-        #100;
-        $display("Reset completado");
-        
-        // 2. Primera lectura
-        $display("\n--- Test 1: Primera lectura ---");
-        iniciar_lectura();
-        esperar_completado();
-        verificar_dato(16'h1234, "Primera lectura");
-        
-        // 3. Segunda lectura
-        $display("\n--- Test 2: Segunda lectura ---");
-        iniciar_lectura();
-        esperar_completado();
-        verificar_dato(16'h1234, "Segunda lectura");
-        
-        // 4. Prueba con reset durante operación
-        $display("\n--- Test 3: Reset durante operación ---");
-        iniciar_lectura();
-        #500; // Esperar un poco
-        reset = 1;
-        #100;
-        reset = 0;
-        $display("Reset aplicado durante operación");
-        
-        // Esperar un momento y hacer otra lectura
-        #1000;
-        iniciar_lectura();
-        esperar_completado();
-        verificar_dato(16'h1234, "Lectura después de reset");
-        
-        // 5. Prueba sin iniciar (debe permanecer en IDLE)
-        $display("\n--- Test 4: Estado IDLE ---");
-        #2000;
-        if (TEMP_done_rdata == 0)
-            $display("PASS: Sin señales done espurias");
-        else
-            $display("FAIL: Señal done activa sin razón");
-        
-        // Finalizar
-        $display("\n====================================");
-        $display("Simulación completada exitosamente!");
-        $display("====================================");
-        #1000;
-        $finish;
+        $dumpfile("random_temp.vcd");
+        $dumpvars(0, tb_sensor_temp);
+
+        #50 rst = 0;
+
+        // Tiempo suficiente para muchas muestras
+        #300000 $finish;
     end
-    
-    // Tarea para iniciar una lectura
-    task iniciar_lectura();
-        TEMP_ctrl_we = 1;
-        TEMP_ctrl_wdata = 32'h00000001; // Bit 0 = 1 para iniciar
-        @(posedge clk);
-        TEMP_ctrl_we = 0;
-        TEMP_ctrl_wdata = 0;
-        $display("  Comando de lectura enviado");
-    endtask
-    
-    // Tarea para esperar a que se complete la operación
-    task esperar_completado();
-        int timeout = 0;
-        while (TEMP_done_rdata == 0 && timeout < 10000) begin
-            @(posedge clk);
-            timeout = timeout + 1;
-        end
-        
-        if (TEMP_done_rdata == 1) begin
-            $display("  Lectura completada en %0d ciclos", timeout);
-        end else begin
-            $display("  ERROR: Timeout después de %0d ciclos", timeout);
-        end
-    endtask
-    
-    // Tarea para verificar el dato leído
-    task verificar_dato(input [15:0] esperado, input string test_name);
-        if (TEMP_data_rdata[15:0] === esperado) begin
-            $display("  PASS: Dato correcto (0x%h)", esperado);
-        end else begin
-            $display("  FAIL: Se esperaba 0x%h, se obtuvo 0x%h", 
-                    esperado, TEMP_data_rdata[15:0]);
-        end
-    endtask
-    
-    // Monitor básico
-    initial begin
-        $monitor("T=%0t: Estado=%s, Done=%b, Dato=0x%h", 
-                $time, dut.st.name(), TEMP_done_rdata, TEMP_data_rdata);
-    end
-    
-    // Timeout global
-    initial begin
-        #50_000_000; // 5ms timeout
-        $display("\nERROR: Timeout de simulación!");
-        $finish;
-    end
-    
-    // Modelo simple de pull-ups para I2C
-    pullup p1(sda);
-    pullup p2(scl);
-    
+
 endmodule
+
