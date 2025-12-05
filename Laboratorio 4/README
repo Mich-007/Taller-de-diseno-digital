@@ -2,6 +2,13 @@
 Profesor: Luis C. Rosales
 Estudiantes: Lesly Mariana Alvarez Alvarez, Laura Elena Brenes Espinoza, Ana Laura Cartín Ruiz, Michelle Gutierrez Araya, Brayan Ariel Vargas Rojas
 
+ El laboratorio 4 constituye el proyecto final del curso y por ello es una actividad integradora que requiere de trabajo en equipo para diseñar e implementar un sistema digital complejo.
+ El proyecto tiene como parte principal el diseño de un microcontrolador, donde la implementación del mismo debe basarse en la arquitectura del set de instrucciones rv32i. Un programa, 
+ que se ejecutará en dicho microcontrolador, deberá orquestar diferentes módulos que controlan entradas de un ADC, botones y switches, salidas hacia LEDs y display de 7 segmentos.
+ La complejidad del sistema a implementar solo es manejable con disciplina de implementación: cada módulo debe tener las pruebas (testbenches) necesarias para asegurar su 
+ funcionamiento correcto a nivel de pre-síntesis, post-síntesis y post-implementación en FPGA. Esto es relevante, en particular, para el microcontrolador a implementar pues de otra 
+ forma no se podrá asegurar que el programa implementado esté ejecutándose de manera correcta.
+
 
 ##Objetivos
  1. Utilizar las herramientas del diseño digital para construir un sistema basado en un microcontrolador, lo que incluye un componente de software 
